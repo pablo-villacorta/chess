@@ -2,6 +2,7 @@ let black, white;
 let selectedTile;
 let availableMoves, showingAvailableMoves;
 
+let numberOfMoves = 0;
 
 function setup() {
   createCanvas(550, 550);
@@ -40,10 +41,14 @@ function mouseClicked() {
               }
             }
 
+            p.recordMove(t.x, t.y);
+
             p.x = t.x;
             p.y = t.y;
             selectedTile = undefined;
             availableMoves = [];
+            numberOfMoves++;
+
             drawGame();
             return;
           }
@@ -54,6 +59,7 @@ function mouseClicked() {
         selectedTile = t;
         availableMoves = piece.getAvailableMoves();
         showingAvailableMoves = true;
+        console.log(piece.moveHistory);
       }
     }
   }

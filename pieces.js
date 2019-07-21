@@ -3,6 +3,27 @@ function Piece(isWhite, x, y) {
   this.y = y;
   this.isWhite = isWhite;
 
+  this.moveHistory = [];
+  /**
+  {
+    moveId: ,
+    oldX: ,
+    oldY: ,
+    newX: ,
+    newY:
+  }
+  */
+
+  this.recordMove = function(newX, newY) {
+    this.moveHistory.push({
+      moveId: numberOfMoves,
+      oldX: this.x,
+      oldY: this.y,
+      newX: newX,
+      newY: newY,
+    });
+  }
+
   this.getAvailableMoves = function() {
     return undefined;
   }
