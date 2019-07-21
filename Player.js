@@ -33,6 +33,14 @@ function Player(name, isWhite) {
   this.pieces.push(new Queen(isWhite, 3, y));
   this.pieces.push(new King(isWhite, 4, y));
 
+  this.deletePieceAt = function(ax, ay) {
+    for(let i = 0; i < this.pieces.length; i++) {
+      if(this.pieces[i].x == ax && this.pieces[i].y == ay) {
+        this.pieces.splice(i, 1);
+        break;
+      }
+    }
+  }
 
   this.drawPieces = function() {
     for(let i = 0; i < this.pieces.length; i++) {

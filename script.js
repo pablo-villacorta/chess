@@ -15,9 +15,7 @@ function setup() {
   drawGame();
 }
 
-function draw() {
-  //console.log(showingAvailableMoves);
-}
+function draw() {}
 
 function mouseClicked() {
   let t = getPointedTile();
@@ -32,6 +30,16 @@ function mouseClicked() {
         for(let i = 0; i < availableMoves.length; i++) {
           if(availableMoves[i].y == t.y && availableMoves[i].x == t.x) {
             let p = getPieceAt(selectedTile.x, selectedTile.y);
+
+            //check for capture
+            if(availableMoves[i].capture) {
+              if(!p.isWhite) {
+                white.deletePieceAt(availableMoves[i].x, availableMoves[i].y);
+              } else {
+                black.deletePieceAt(availableMoves[i].x, availableMoves[i].y);
+              }
+            }
+
             p.x = t.x;
             p.y = t.y;
             selectedTile = undefined;
