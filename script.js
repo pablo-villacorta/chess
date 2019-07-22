@@ -2,7 +2,7 @@ let black, white;
 let selectedTile;
 let availableMoves, showingAvailableMoves;
 
-let numberOfMoves = 0;
+let moveHistory = [];
 
 function setup() {
   createCanvas(550, 550);
@@ -34,20 +34,38 @@ function mouseClicked() {
 
             //check for capture
             if(availableMoves[i].capture) {
-              if(!p.isWhite) {
-                white.deletePieceAt(availableMoves[i].x, availableMoves[i].y);
+              if(getPieceAt(t.x, t.y)) {
+                //normal capture
+                if(!p.isWhite) {
+                  white.deletePieceAt(availableMoves[i].x, availableMoves[i].y);
+                } else {
+                  black.deletePieceAt(availableMoves[i].x, availableMoves[i].y);
+                }
               } else {
-                black.deletePieceAt(availableMoves[i].x, availableMoves[i].y);
+                //en passant
+                console.log("en passant");
+                if(p.isWhite) {
+                  black.deletePieceAt(t.x, t.y+1);
+                } else {
+                  white.deletePieceAt(t.x, t.y-1);
+                }
               }
             }
 
-            p.recordMove(t.x, t.y);
+            moveHistory.push({
+              piece: p,
+              oldX: p.x,
+              oldY: p.y,
+              newX: t.x,
+              newY: t.y
+            });
 
             p.x = t.x;
             p.y = t.y;
             selectedTile = undefined;
             availableMoves = [];
-            numberOfMoves++;
+
+            console.log(moveHistory);
 
             drawGame();
             return;
@@ -59,7 +77,6 @@ function mouseClicked() {
         selectedTile = t;
         availableMoves = piece.getAvailableMoves();
         showingAvailableMoves = true;
-        console.log(piece.moveHistory);
       }
     }
   }

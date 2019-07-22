@@ -3,27 +3,6 @@ function Piece(isWhite, x, y) {
   this.y = y;
   this.isWhite = isWhite;
 
-  this.moveHistory = [];
-  /**
-  {
-    moveId: ,
-    oldX: ,
-    oldY: ,
-    newX: ,
-    newY:
-  }
-  */
-
-  this.recordMove = function(newX, newY) {
-    this.moveHistory.push({
-      moveId: numberOfMoves,
-      oldX: this.x,
-      oldY: this.y,
-      newX: newX,
-      newY: newY,
-    });
-  }
-
   this.getAvailableMoves = function() {
     return undefined;
   }
@@ -60,6 +39,22 @@ function Pawn(isWhite, x, y) {
           am.push({x: this.x+1, y: this.y-1, check: false, capture: true});
         }
       }
+
+      //en passant
+      if(this.y == 3) {
+        if(!isFree(this.x+1, this.y)) {
+          let move = moveHistory[moveHistory.length-1];
+          if(move.piece == getPieceAt(this.x+1, this.y) && Math.abs(move.newY-move.oldY) == 2) {
+            am.push({x: this.x+1, y: this.y-1, check: false, capture: true});
+          }
+        }
+        if(!isFree(this.x-1, this.y)) {
+          let move = moveHistory[moveHistory.length-1];
+          if(move.piece == getPieceAt(this.x-1, this.y) && Math.abs(move.newY-move.oldY) == 2) {
+            am.push({x: this.x-1, y: this.y-1, check: false, capture: true});
+          }
+        }
+      }
     } else {
       if(this.y == 1) { //initial tile
         if(isFree(this.x, this.y+2)) {
@@ -77,6 +72,22 @@ function Pawn(isWhite, x, y) {
       if(!isFree(this.x+1, this.y+1)) {
         if(getPieceAt(this.x+1, this.y+1).isWhite != this.isWhite) {
           am.push({x: this.x+1, y: this.y+1, check: false, capture: true});
+        }
+      }
+
+      //en passant
+      if(this.y == 4) {
+        if(!isFree(this.x+1, this.y)) {
+          let move = moveHistory[moveHistory.length-1];
+          if(move.piece == getPieceAt(this.x+1, this.y) && Math.abs(move.newY-move.oldY) == 2) {
+            am.push({x: this.x+1, y: this.y+1, check: false, capture: true});
+          }
+        }
+        if(!isFree(this.x-1, this.y)) {
+          let move = moveHistory[moveHistory.length-1];
+          if(move.piece == getPieceAt(this.x-1, this.y) && Math.abs(move.newY-move.oldY) == 2) {
+            am.push({x: this.x-1, y: this.y+1, check: false, capture: true});
+          }
         }
       }
     }
