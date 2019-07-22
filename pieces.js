@@ -6,6 +6,15 @@ function Piece(isWhite, x, y) {
   this.getAvailableMoves = function() {
     return undefined;
   }
+
+  this.hasBeenMoved = function() {
+    for(let i = 0; i < moveHistory.length; i++) {
+      if(moveHistory[i].piece == this) {
+        return true;
+      }
+    }
+    return false;
+  }
 }
 
 function Pawn(isWhite, x, y) {
@@ -225,6 +234,52 @@ function King(isWhite, x, y) {
         }
       }
     }
+
+    //castling
+    if(!this.hasBeenMoved()) {
+      if(this.isWhite) {
+        //to the right
+        if(isFree(this.x+1, this.y) && isFree(this.x+2, this.y) && !isFree(7,7)) {
+          if(!getPieceAt(7,7).hasBeenMoved()) {
+            am.push({x: this.x+2, y: this.y, check: false, capture: false, castling: {
+              piece: getPieceAt(7,7),
+              newX: this.x+1
+            }});
+          }
+        }
+
+        //to the left
+        if(isFree(this.x-1, this.y) && isFree(this.x-2, this.y) && isFree(this.x-3, this.y) && !isFree(0,7)) {
+          if(!getPieceAt(0,7).hasBeenMoved()) {
+            am.push({x: this.x-2, y: this.y, check: false, capture: false, castling: {
+              piece: getPieceAt(0,7),
+              newX: this.x-1
+            }});
+          }
+        }
+      } else { //isBlack
+        //to the right
+        if(isFree(this.x+1, this.y) && isFree(this.x+2, this.y) && !isFree(7,0)) {
+          if(!getPieceAt(7,0).hasBeenMoved()) {
+            am.push({x: this.x+2, y: this.y, check: false, capture: false, castling: {
+              piece: getPieceAt(7,0),
+              newX: this.x+1
+            }});
+          }
+        }
+
+        //to the left
+        if(isFree(this.x-1, this.y) && isFree(this.x-2, this.y) && isFree(this.x-3, this.y) && !isFree(0,0)) {
+          if(!getPieceAt(0,0).hasBeenMoved()) {
+            am.push({x: this.x-2, y: this.y, check: false, capture: false, castling: {
+              piece: getPieceAt(0,0),
+              newX: this.x-1
+            }});
+          }
+        }
+      }
+    }
+
 
     return am;
   }

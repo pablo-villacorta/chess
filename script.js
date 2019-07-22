@@ -43,7 +43,6 @@ function mouseClicked() {
                 }
               } else {
                 //en passant
-                console.log("en passant");
                 if(p.isWhite) {
                   black.deletePieceAt(t.x, t.y+1);
                 } else {
@@ -60,12 +59,14 @@ function mouseClicked() {
               newY: t.y
             });
 
+            if(availableMoves[i].castling) {
+                availableMoves[i].castling.piece.x = availableMoves[i].castling.newX;
+            }
+
             p.x = t.x;
             p.y = t.y;
             selectedTile = undefined;
             availableMoves = [];
-
-            console.log(moveHistory);
 
             drawGame();
             return;
