@@ -3,7 +3,7 @@ function Piece(isWhite, x, y) {
   this.y = y;
   this.isWhite = isWhite;
 
-  this.getAvailableMoves = function() {
+  this.getAvailableMoves = function(realMove) {
     return undefined;
   }
 
@@ -27,7 +27,7 @@ function Pawn(isWhite, x, y) {
     text("Pawn", this.x*side + side/2, this.y*side+side/2);
   };
 
-  this.getAvailableMoves = function() {
+  this.getAvailableMoves = function(realMove) {
     let am = [];
     if(this.isWhite) {
       if(this.y == 6) { //initial tile
@@ -101,6 +101,8 @@ function Pawn(isWhite, x, y) {
       }
     }
 
+    //removeCheckMoves(am, this);
+
     return am;
   }
 }
@@ -118,6 +120,7 @@ function Rook(isWhite, x, y) {
   this.getAvailableMoves = function() {
     let am = [];
     addOrtogonalMoves(am, this);
+    //removeCheckMoves(am, this);
     return am;
   }
 }
@@ -159,6 +162,8 @@ function Knight(isWhite, x, y) {
       }
     }
 
+    //removeCheckMoves(am, this);
+
     return am;
   }
 }
@@ -176,6 +181,7 @@ function Bishop(isWhite, x, y) {
   this.getAvailableMoves = function() {
     let am = [];
     addDiagonalMoves(am, this);
+    //removeCheckMoves(am, this);
     return am;
   }
 }
@@ -194,6 +200,7 @@ function Queen(isWhite, x, y) {
     let am = [];
     addOrtogonalMoves(am, this);
     addDiagonalMoves(am, this);
+    //removeCheckMoves(am, this);
     return am;
   }
 }
@@ -280,8 +287,31 @@ function King(isWhite, x, y) {
       }
     }
 
+    //removeCheckMoves(am, this);
 
     return am;
+  }
+}
+
+function removeCheckMoves(am, p) { //am = availableMoves list
+  let player = black;
+  if(p.isWhite) player = white;
+  let xy = {
+    x: p.x,
+    y: p.y
+  };
+  for(let i = am.length-1; i >= 0; i--) {
+    player.deletePieceAt(p.x, p.y);
+    p.x = am[i].x;
+    p.y = am[i].y;
+
+    if(player.isInCheck()) {
+      //am.splice(i, 1);
+    }
+
+    p.x = xy.x;
+    p.y = xy.y;
+    player.pieces.push(p);
   }
 }
 

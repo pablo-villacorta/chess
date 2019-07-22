@@ -68,6 +68,9 @@ function mouseClicked() {
             selectedTile = undefined;
             availableMoves = [];
 
+            console.log("white in check: "+white.isInCheck());
+            console.log("black in check: "+black.isInCheck());
+
             drawGame();
             return;
           }

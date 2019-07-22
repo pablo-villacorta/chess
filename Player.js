@@ -31,7 +31,26 @@ function Player(name, isWhite) {
 
   //queen & king
   this.pieces.push(new Queen(isWhite, 3, y));
-  this.pieces.push(new King(isWhite, 4, y));
+  this.king = new King(isWhite, 4, y);
+  this.pieces.push(this.king);
+
+  this.isInCheck = function() {
+    let op = white;
+    if(this.isWhite) op = black;
+
+    for(let i = 0; i < op.pieces.length; i++) {
+      let am = op.pieces[i].getAvailableMoves(true);
+      for(let j = 0; j < am.length; j++) {
+        if(am[j].capture) {
+          if(getPieceAt(am[j].x, am[j].y) == this.king) {
+            return true;
+          }
+        }
+      }
+    }
+
+    return false;
+  }
 
   this.deletePieceAt = function(ax, ay) {
     for(let i = 0; i < this.pieces.length; i++) {
