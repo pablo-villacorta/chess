@@ -3,7 +3,7 @@ function Piece(isWhite, x, y) {
   this.y = y;
   this.isWhite = isWhite;
 
-  this.getAvailableMoves = function(realMove) {
+  this.getAvailableMoves = function() {
     return undefined;
   }
 
@@ -14,6 +14,14 @@ function Piece(isWhite, x, y) {
       }
     }
     return false;
+  }
+
+  this.getAbrv = function() {
+    if(this.isWhite) {
+      return this.getName()[0];
+    } else {
+      return (this.getName()).toLowerCase()[0];
+    }
   }
 }
 
@@ -27,7 +35,7 @@ function Pawn(isWhite, x, y) {
     text("Pawn", this.x*side + side/2, this.y*side+side/2);
   };
 
-  this.getAvailableMoves = function(realMove) {
+  this.getAvailableMoves = function() {
     let am = [];
     if(this.isWhite) {
       if(this.y == 6) { //initial tile
@@ -101,8 +109,6 @@ function Pawn(isWhite, x, y) {
       }
     }
 
-    //removeCheckMoves(am, this);
-
     return am;
   }
 }
@@ -120,7 +126,6 @@ function Rook(isWhite, x, y) {
   this.getAvailableMoves = function() {
     let am = [];
     addOrtogonalMoves(am, this);
-    //removeCheckMoves(am, this);
     return am;
   }
 }
@@ -162,8 +167,6 @@ function Knight(isWhite, x, y) {
       }
     }
 
-    //removeCheckMoves(am, this);
-
     return am;
   }
 }
@@ -181,7 +184,6 @@ function Bishop(isWhite, x, y) {
   this.getAvailableMoves = function() {
     let am = [];
     addDiagonalMoves(am, this);
-    //removeCheckMoves(am, this);
     return am;
   }
 }
@@ -200,7 +202,6 @@ function Queen(isWhite, x, y) {
     let am = [];
     addOrtogonalMoves(am, this);
     addDiagonalMoves(am, this);
-    //removeCheckMoves(am, this);
     return am;
   }
 }
@@ -287,31 +288,43 @@ function King(isWhite, x, y) {
       }
     }
 
-    //removeCheckMoves(am, this);
-
     return am;
   }
 }
 
 function removeCheckMoves(am, p) { //am = availableMoves list
   let player = black;
-  if(p.isWhite) player = white;
+  let op = white;
+  if(p.isWhite) {
+    player = white;
+    op = black;
+  }
+
   let xy = {
     x: p.x,
     y: p.y
   };
+
   for(let i = am.length-1; i >= 0; i--) {
-    player.deletePieceAt(p.x, p.y);
+    let cap;
+    if(am[i].capture) {
+      cap = getPieceAt(am[i].x, am[i].y);
+      op.deletePieceAt(am[i].x, am[i].y);
+    }
+
     p.x = am[i].x;
     p.y = am[i].y;
 
     if(player.isInCheck()) {
-      //am.splice(i, 1);
+      am.splice(i, 1);
     }
 
     p.x = xy.x;
     p.y = xy.y;
-    player.pieces.push(p);
+
+    if(cap) {
+      op.pieces.push(cap);
+    }
   }
 }
 
@@ -438,3 +451,9 @@ function chooseColor(isWhite) {
     fill(0,180,0);
   }
 }
+
+Object.prototype.getName = function() {
+   var funcNameRegex = /function (.{1,})\(/;
+   var results = (funcNameRegex).exec((this).constructor.toString());
+   return (results && results.length > 1) ? results[1] : "";
+};

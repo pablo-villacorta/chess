@@ -68,8 +68,10 @@ function mouseClicked() {
             selectedTile = undefined;
             availableMoves = [];
 
-            console.log("white in check: "+white.isInCheck());
-            console.log("black in check: "+black.isInCheck());
+            printBoard();
+
+            if(white.isInCheck()) console.log("white in check");
+            if(black.isInCheck()) console.log("black in check");
 
             drawGame();
             return;
@@ -80,6 +82,10 @@ function mouseClicked() {
       if(piece) {
         selectedTile = t;
         availableMoves = piece.getAvailableMoves();
+        console.log(piece.getAbrv());
+        console.log("original availableMoves.length = "+availableMoves.length);
+        removeCheckMoves(availableMoves, piece);
+        console.log("availableMoves.length = "+availableMoves.length);
         showingAvailableMoves = true;
       }
     }
@@ -151,6 +157,21 @@ function getPieceAt(x, y) {
   }
 
   return undefined;
+}
+
+function printBoard() { //in the console (for debugging)
+  for(let i = 0; i < 8; i++) {
+    let line = "";
+    for(let j = 0; j < 8; j++) {
+      let p = getPieceAt(j, i);
+      let additional = "x";
+      if(p) {
+        additional = p.getAbrv();
+      }
+      line = line + " " + additional;
+    }
+    console.log(line + "      " + Math.random());
+  }
 }
 
 function isFree(x, y) {
