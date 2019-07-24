@@ -248,41 +248,89 @@ function King(isWhite, x, y) {
       if(this.isWhite) {
         //to the right
         if(isFree(this.x+1, this.y) && isFree(this.x+2, this.y) && !isFree(7,7)) {
-          if(!getPieceAt(7,7).hasBeenMoved()) {
-            am.push({x: this.x+2, y: this.y, check: false, capture: false, castling: {
-              piece: getPieceAt(7,7),
-              newX: this.x+1
-            }});
+          let limitationByCheck = false;
+          let origX = this.x;
+          for(let k = 0; k < 3; k++) {
+            this.x = origX + k;
+            if(white.isInCheck()) {
+              limitationByCheck = true;
+              break;
+            }
+          }
+          this.x = origX;
+          if(!limitationByCheck) {
+            if(!getPieceAt(7,7).hasBeenMoved()) {
+              am.push({x: this.x+2, y: this.y, check: false, capture: false, castling: {
+                piece: getPieceAt(7,7),
+                newX: this.x+1
+              }});
+            }
           }
         }
 
         //to the left
         if(isFree(this.x-1, this.y) && isFree(this.x-2, this.y) && isFree(this.x-3, this.y) && !isFree(0,7)) {
-          if(!getPieceAt(0,7).hasBeenMoved()) {
-            am.push({x: this.x-2, y: this.y, check: false, capture: false, castling: {
-              piece: getPieceAt(0,7),
-              newX: this.x-1
-            }});
+          let limitationByCheck = false;
+          let origX = this.x;
+          for(let k = 0; k < 3; k++) {
+            this.x = origX - k;
+            if(white.isInCheck()) {
+              limitationByCheck = true;
+              break;
+            }
+          }
+          this.x = origX;
+          if(!limitationByCheck) {
+            if(!getPieceAt(0,7).hasBeenMoved()) {
+              am.push({x: this.x-2, y: this.y, check: false, capture: false, castling: {
+                piece: getPieceAt(0,7),
+                newX: this.x-1
+              }});
+            }
           }
         }
       } else { //isBlack
         //to the right
         if(isFree(this.x+1, this.y) && isFree(this.x+2, this.y) && !isFree(7,0)) {
-          if(!getPieceAt(7,0).hasBeenMoved()) {
-            am.push({x: this.x+2, y: this.y, check: false, capture: false, castling: {
-              piece: getPieceAt(7,0),
-              newX: this.x+1
-            }});
+          let limitationByCheck = false;
+          let origX = this.x;
+          for(let k = 0; k < 3; k++) {
+            this.x = origX + k;
+            if(black.isInCheck()) {
+              limitationByCheck = true;
+              break;
+            }
+          }
+          this.x = origX;
+          if(!limitationByCheck) {
+            if(!getPieceAt(7,0).hasBeenMoved()) {
+              am.push({x: this.x+2, y: this.y, check: false, capture: false, castling: {
+                piece: getPieceAt(7,0),
+                newX: this.x+1
+              }});
+            }
           }
         }
 
         //to the left
         if(isFree(this.x-1, this.y) && isFree(this.x-2, this.y) && isFree(this.x-3, this.y) && !isFree(0,0)) {
-          if(!getPieceAt(0,0).hasBeenMoved()) {
-            am.push({x: this.x-2, y: this.y, check: false, capture: false, castling: {
-              piece: getPieceAt(0,0),
-              newX: this.x-1
-            }});
+          let limitationByCheck = false;
+          let origX = this.x;
+          for(let k = 0; k < 3; k++) {
+            this.x = origX - k;
+            if(black.isInCheck()) {
+              limitationByCheck = true;
+              break;
+            }
+          }
+          this.x = origX;
+          if(!limitationByCheck) {
+            if(!getPieceAt(0,0).hasBeenMoved()) {
+              am.push({x: this.x-2, y: this.y, check: false, capture: false, castling: {
+                piece: getPieceAt(0,0),
+                newX: this.x-1
+              }});
+            }
           }
         }
       }
