@@ -68,6 +68,28 @@ function mouseClicked() {
             selectedTile = undefined;
             availableMoves = [];
 
+            //promotion
+            if(p.getName() == "Pawn") {
+              if((p.isWhite && p.y == 0) || (!p.isWhite && p.y == 7)) {
+                let player = p.isWhite ? white : black;
+                player.deletePieceAt(p.x, p.y);
+
+                let ans = prompt("Pawn promotion (choose between queen, knight, rook or bishop):");
+                ans = ans.toLowerCase().trim();
+                let newPiece;
+                if(ans[0] == 'q') {
+                  newPiece = new Queen(p.isWhite, p.x, p.y);
+                } else if(ans[1] == 'k') {
+                  newPiece = new Knight(p.isWhite, p.x, p.y);
+                } else if(ans[2] == 'r') {
+                  newPiece = new Rook(p.isWhite, p.x, p.y);
+                } else {
+                  newPiece = new Bishop(p.isWhite, p.x, p.y);
+                }
+                player.pieces.push(newPiece);
+              }
+            }
+
             if(white.isInCheck()) console.log("white in check");
             if(black.isInCheck()) console.log("black in check");
             if(white.isInCheckMate()) alert("black wins");
