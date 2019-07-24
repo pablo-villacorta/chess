@@ -39,7 +39,7 @@ function Player(name, isWhite) {
     if(this.isWhite) op = black;
 
     for(let i = 0; i < op.pieces.length; i++) {
-      let am = op.pieces[i].getAvailableMoves();
+      let am = op.pieces[i].getAvailableMoves(true);
       for(let j = 0; j < am.length; j++) {
         if(am[j].capture) {
           if(getPieceAt(am[j].x, am[j].y) == this.king) {

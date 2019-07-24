@@ -216,7 +216,7 @@ function King(isWhite, x, y) {
     text("King", this.x*side + side/2, this.y*side+side/2);
   };
 
-  this.getAvailableMoves = function() {
+  this.getAvailableMoves = function(ignoreCastling) {
     let am = [];
 
     let p = [
@@ -242,6 +242,8 @@ function King(isWhite, x, y) {
         }
       }
     }
+
+    if(ignoreCastling) return am;
 
     //castling
     if(!this.hasBeenMoved()) {

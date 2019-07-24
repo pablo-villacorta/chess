@@ -4,6 +4,8 @@ let availableMoves, showingAvailableMoves;
 
 let moveHistory = [];
 
+let whiteTurn = true;
+
 function setup() {
   createCanvas(550, 550);
   background(0);
@@ -31,6 +33,8 @@ function mouseClicked() {
         for(let i = 0; i < availableMoves.length; i++) {
           if(availableMoves[i].y == t.y && availableMoves[i].x == t.x) {
             let p = getPieceAt(selectedTile.x, selectedTile.y);
+
+            whiteTurn = !whiteTurn;
 
             //check for capture
             if(availableMoves[i].capture) {
@@ -101,7 +105,7 @@ function mouseClicked() {
         }
       }
       let piece = getPieceAt(t.x, t.y);
-      if(piece) {
+      if(piece && whiteTurn == piece.isWhite) {
         selectedTile = t;
         availableMoves = piece.getAvailableMoves();
         removeCheckMoves(availableMoves, piece);
