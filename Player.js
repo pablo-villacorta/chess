@@ -52,6 +52,20 @@ function Player(name, isWhite) {
     return false;
   }
 
+  this.isInCheckMate = function() {
+    return this.getTotalAmountOfAvailableMoves() == 0 && this.isInCheck();
+  }
+
+  this.getTotalAmountOfAvailableMoves = function() {
+    let c = 0;
+    for(let i = 0; i < this.pieces.length; i++) {
+      let am = this.pieces[i].getAvailableMoves();
+      removeCheckMoves(am, this.pieces[i]);
+      c += am.length;
+    }
+    return c;
+  }
+
   this.deletePieceAt = function(ax, ay) {
     for(let i = 0; i < this.pieces.length; i++) {
       if(this.pieces[i].x == ax && this.pieces[i].y == ay) {

@@ -68,10 +68,10 @@ function mouseClicked() {
             selectedTile = undefined;
             availableMoves = [];
 
-            printBoard();
-
             if(white.isInCheck()) console.log("white in check");
             if(black.isInCheck()) console.log("black in check");
+            if(white.isInCheckMate()) alert("black wins");
+            if(black.isInCheckMate()) alert("white wins");
 
             drawGame();
             return;
@@ -82,10 +82,7 @@ function mouseClicked() {
       if(piece) {
         selectedTile = t;
         availableMoves = piece.getAvailableMoves();
-        console.log(piece.getAbrv());
-        console.log("original availableMoves.length = "+availableMoves.length);
         removeCheckMoves(availableMoves, piece);
-        console.log("availableMoves.length = "+availableMoves.length);
         showingAvailableMoves = true;
       }
     }
