@@ -12,6 +12,11 @@ let whiteBishopImg, whiteKingImg, whiteKnightImg, whitePawnImg, whiteQueenImg, w
 let side, margin;
 let prop = 0.6;
 
+let socket;
+let ready = false;
+
+let myPlayer;
+
 function preload() {
   blackBishopImg = loadImage("sprites/blackBishop.png");
   blackKingImg = loadImage("sprites/blackKing.png");
@@ -28,8 +33,11 @@ function preload() {
 }
 
 function setup() {
-  createCanvas(550, 550);
+  let canvas = createCanvas(550, 550);
+  canvas.parent("gameContainer");
   background(0);
+
+  socket = io.connect("http://localhost:3000");
 
   side = width/8;
   margin = side*(1-prop)/2;
@@ -39,12 +47,15 @@ function setup() {
   black = new Player("Blackie", false);
   white = new Player("Whitacker", true);
 
-  drawGame();
+  //drawGame();
+  console.log("waiting for an opponent...");
+  socketSetup();
 }
 
 function draw() {}
 
 function mouseClicked() {
+  if(!ready) return;
   let t = getPointedTile();
   if(t) {
     if(selectedTile && t.x == selectedTile.x && t.y == selectedTile.y) {
@@ -59,9 +70,23 @@ function mouseClicked() {
             let p = getPieceAt(selectedTile.x, selectedTile.y);
 
             whiteTurn = !whiteTurn;
+            console.log("whiteTurn turned to "+whiteTurn+", when local moved");
+
+            let msg = {
+              oldX: selectedTile.x,
+              oldY: selectedTile.y,
+              newX: t.x,
+              newY: t.y,
+              capture: false,
+              enPassant: false,
+              castling: false,
+              promotion: false,
+              promotionType: undefined
+            };
 
             //check for capture
             if(availableMoves[i].capture) {
+              msg.capture = true;
               if(getPieceAt(t.x, t.y)) {
                 //normal capture
                 if(!p.isWhite) {
@@ -71,6 +96,7 @@ function mouseClicked() {
                 }
               } else {
                 //en passant
+                msg.enPassant = true;
                 if(p.isWhite) {
                   black.deletePieceAt(t.x, t.y+1);
                 } else {
@@ -88,7 +114,8 @@ function mouseClicked() {
             });
 
             if(availableMoves[i].castling) {
-                availableMoves[i].castling.piece.x = availableMoves[i].castling.newX;
+              msg.castling = true;
+              availableMoves[i].castling.piece.x = availableMoves[i].castling.newX;
             }
 
             p.x = t.x;
@@ -99,6 +126,7 @@ function mouseClicked() {
             //promotion
             if(p.getName() == "Pawn") {
               if((p.isWhite && p.y == 0) || (!p.isWhite && p.y == 7)) {
+                msg.promotion = true;
                 let player = p.isWhite ? white : black;
                 player.deletePieceAt(p.x, p.y);
 
@@ -106,12 +134,16 @@ function mouseClicked() {
                 ans = ans.toLowerCase().trim();
                 let newPiece;
                 if(ans[0] == 'q') {
+                  msg.promotionType = "queen";
                   newPiece = new Queen(p.isWhite, p.x, p.y);
                 } else if(ans[1] == 'k') {
+                  msg.promotionType = "knight";
                   newPiece = new Knight(p.isWhite, p.x, p.y);
                 } else if(ans[2] == 'r') {
+                  msg.promotionType = "rook";
                   newPiece = new Rook(p.isWhite, p.x, p.y);
                 } else {
+                  msg.promotionType = "bishop";
                   newPiece = new Bishop(p.isWhite, p.x, p.y);
                 }
                 player.pieces.push(newPiece);
@@ -123,13 +155,15 @@ function mouseClicked() {
             if(white.isInCheckMate()) alert("black wins");
             if(black.isInCheckMate()) alert("white wins");
 
+            socket.emit("move", msg);
+
             drawGame();
             return;
           }
         }
       }
       let piece = getPieceAt(t.x, t.y);
-      if(piece && whiteTurn == piece.isWhite) {
+      if(piece && whiteTurn == myPlayer.isWhite && whiteTurn == piece.isWhite) {
         selectedTile = t;
         availableMoves = piece.getAvailableMoves();
         removeCheckMoves(availableMoves, piece);
@@ -140,6 +174,65 @@ function mouseClicked() {
   drawGame();
 }
 
+function socketSetup() {
+  socket.on("ready", startGame);
+  socket.on("move", receiveMove);
+}
+
+function startGame(data) {
+  ready = true;
+  myPlayer = data.isWhite ? white : black;
+
+  drawGame();
+
+  console.log("Game is ready!!!");
+  console.log("Am I white? "+data.isWhite);
+  console.log("Game id: "+data.gameId);
+}
+
+function receiveMove(data) {
+  whiteTurn = !whiteTurn;
+  console.log("whiteTurn turned to "+whiteTurn+", when remote moved");
+
+  //apply changes
+  if(data.capture) {
+    if(!isFree(data.newX, data.newY)) {
+      //normal capture
+      let p = getPieceAt(data.newX, data.newY);
+      let pl = p.isWhite ? white : black;
+      pl.deletePieceAt(data.newX, data.newY);
+    } else {
+      //en passant
+
+    }
+  } else {
+    let p = getPieceAt(data.oldX, data.oldY);
+    p.x = data.newX;
+    p.y = data.newY;
+    if(data.castling) {
+      let pl = p.isWhite ? white : black;
+      if(pl.king.x > 4) {
+        //castling to the right
+
+      } else {
+        //castling to the left
+
+      }
+    }
+
+    let pl = p.isWhite ? white : black;
+    if(data.promotion) {
+      pl.deletePieceAt(p.x, p.y);
+      let newPiece;
+      if(data.promotionType == "queen") newPiece = new Queen(p.isWhite, p.x, p.y);
+      if(data.promotionType == "knight") newPiece = new Knight(p.isWhite, p.x, p.y);
+      if(data.promotionType == "rook") newPiece = new Rook(p.isWhite, p.x, p.y);
+      if(data.promotionType == "bishop") newPiece = new Bishop(p.isWhite, p.x, p.y);
+      pl.pieces.push(newPiece);
+    }
+  }
+  drawGame();
+}
 
 function drawGame() {
   drawBoard();
