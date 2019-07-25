@@ -29,10 +29,7 @@ function Pawn(isWhite, x, y) {
   Piece.call(this, isWhite, x, y);
 
   this.draw = function() {
-    let side = width/8;
-    chooseColor(this.isWhite);
-    textAlign(CENTER);
-    text("Pawn", this.x*side + side/2, this.y*side+side/2);
+    image(this.isWhite ? whitePawnImg : blackPawnImg, this.x*side+margin, this.y*side+margin, side*prop, side*prop);
   };
 
   this.getAvailableMoves = function() {
@@ -117,10 +114,7 @@ function Rook(isWhite, x, y) {
   Piece.call(this, isWhite, x, y);
 
   this.draw = function() {
-    let side = width/8;
-    chooseColor(this.isWhite);
-    textAlign(CENTER);
-    text("Rook", this.x*side + side/2, this.y*side+side/2);
+    image(this.isWhite ? whiteRookImg : blackRookImg, this.x*side+margin, this.y*side+margin, side*prop, side*prop);
   };
 
   this.getAvailableMoves = function() {
@@ -134,10 +128,7 @@ function Knight(isWhite, x, y) {
   Piece.call(this, isWhite, x, y);
 
   this.draw = function() {
-    let side = width/8;
-    chooseColor(this.isWhite);
-    textAlign(CENTER);
-    text("Knight", this.x*side + side/2, this.y*side+side/2);
+    image(this.isWhite ? whiteKnightImg : blackKnightImg, this.x*side+margin, this.y*side+margin, side*prop, side*prop);
   };
 
   this.getAvailableMoves = function() {
@@ -175,10 +166,7 @@ function Bishop(isWhite, x, y) {
   Piece.call(this, isWhite, x, y);
 
   this.draw = function() {
-    let side = width/8;
-    chooseColor(this.isWhite);
-    textAlign(CENTER);
-    text("Bishop", this.x*side + side/2, this.y*side+side/2);
+    image(this.isWhite ? whiteBishopImg : blackBishopImg, this.x*side+margin, this.y*side+margin, side*prop, side*prop);
   };
 
   this.getAvailableMoves = function() {
@@ -192,10 +180,7 @@ function Queen(isWhite, x, y) {
   Piece.call(this, isWhite, x, y);
 
   this.draw = function() {
-    let side = width/8;
-    chooseColor(this.isWhite);
-    textAlign(CENTER);
-    text("Queen", this.x*side + side/2, this.y*side+side/2);
+    image(this.isWhite ? whiteQueenImg : blackQueenImg, this.x*side+margin, this.y*side+margin, side*prop, side*prop);
   };
 
   this.getAvailableMoves = function() {
@@ -210,10 +195,7 @@ function King(isWhite, x, y) {
   Piece.call(this, isWhite, x, y);
 
   this.draw = function() {
-    let side = width/8;
-    chooseColor(this.isWhite);
-    textAlign(CENTER);
-    text("King", this.x*side + side/2, this.y*side+side/2);
+    image(this.isWhite ? whiteKingImg : blackKingImg, this.x*side+margin, this.y*side+margin, side*prop, side*prop);
   };
 
   this.getAvailableMoves = function(ignoreCastling) {

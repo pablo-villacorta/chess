@@ -6,9 +6,33 @@ let moveHistory = [];
 
 let whiteTurn = true;
 
+let blackBishopImg, blackKingImg, blackKnightImg, blackPawnImg, blackQueenImg, blackRookImg;
+let whiteBishopImg, whiteKingImg, whiteKnightImg, whitePawnImg, whiteQueenImg, whiteRookImg;
+
+let side, margin;
+let prop = 0.6;
+
+function preload() {
+  blackBishopImg = loadImage("sprites/blackBishop.png");
+  blackKingImg = loadImage("sprites/blackKing.png");
+  blackKnightImg = loadImage("sprites/blackKnight.png");
+  blackPawnImg = loadImage("sprites/blackPawn.png");
+  blackQueenImg = loadImage("sprites/blackQueen.png");
+  blackRookImg = loadImage("sprites/blackRook.png");
+  whiteBishopImg = loadImage("sprites/whiteBishop.png");
+  whiteKingImg = loadImage("sprites/whiteKing.png");
+  whiteKnightImg = loadImage("sprites/whiteKnight.png");
+  whitePawnImg = loadImage("sprites/whitePawn.png");
+  whiteQueenImg = loadImage("sprites/whiteQueen.png");
+  whiteRookImg = loadImage("sprites/whiteRook.png");
+}
+
 function setup() {
   createCanvas(550, 550);
   background(0);
+
+  side = width/8;
+  margin = side*(1-prop)/2;
 
   showingAvailableMoves = false;
 
@@ -131,7 +155,7 @@ function drawBoard() {
       if((i+j) % 2 == 0) {
         fill(255);
       } else {
-        fill(0);
+        fill(100);
       }
       if(selectedTile) {
         if(i == selectedTile.y && j == selectedTile.x) {
