@@ -18,6 +18,7 @@ let lastPlayer;
 let games = [];
 
 function newConnection(socket) {
+  console.log("someone connected");
   let p = new Player(socket, true);
   if(lastPlayer) { //two available players
     games.push(new Game(lastPlayer, p));

@@ -45,7 +45,9 @@ function setup() {
   turnIndicator = document.getElementById("turnIndicator");
   checkIndicator = document.getElementById("checkIndicator");
 
-  socket = io.connect("http://192.168.1.34:3000");
+  let ip = prompt("Game server IP address?");
+
+  socket = io.connect("http://"+ip+":25567");
 
   side = width/8;
   margin = side*(1-prop)/2;
@@ -187,8 +189,8 @@ function checkForCheck() {
     checkIndicator.style.backgroundColor = "black";
   }
   let op = myPlayer.isWhite ? black : white;
-  if(myPlayer.isInCheckMate()) console.log("You lose!");
-  if(op.isInCheckMate()) console.log("You win!");
+  if(myPlayer.isInCheckMate()) alert("You lose!");
+  if(op.isInCheckMate()) alert("You win!");
 }
 
 function socketSetup() {
