@@ -17,6 +17,8 @@ let ready = false;
 
 let myPlayer;
 
+let turnIndicator, checkIndicator;
+
 function preload() {
   blackBishopImg = loadImage("sprites/blackBishop.png");
   blackKingImg = loadImage("sprites/blackKing.png");
@@ -36,8 +38,14 @@ function setup() {
   let canvas = createCanvas(550, 550);
   canvas.parent("gameContainer");
   background(0);
+  fill(255);
+  textAlign(CENTER);
+  text("Waiting for an opponent...", width/2, height/2);
 
-  socket = io.connect("http://localhost:3000");
+  turnIndicator = document.getElementById("turnIndicator");
+  checkIndicator = document.getElementById("checkIndicator");
+
+  socket = io.connect("http://192.168.1.34:3000");
 
   side = width/8;
   margin = side*(1-prop)/2;
@@ -48,7 +56,6 @@ function setup() {
   white = new Player("Whitacker", true);
 
   //drawGame();
-  console.log("waiting for an opponent...");
   socketSetup();
 }
 
@@ -70,7 +77,7 @@ function mouseClicked() {
             let p = getPieceAt(selectedTile.x, selectedTile.y);
 
             whiteTurn = !whiteTurn;
-            console.log("whiteTurn turned to "+whiteTurn+", when local moved");
+            turnIndicator.style.backgroundColor = 'black';
 
             let msg = {
               oldX: selectedTile.x,
@@ -150,10 +157,7 @@ function mouseClicked() {
               }
             }
 
-            if(white.isInCheck()) console.log("white in check");
-            if(black.isInCheck()) console.log("black in check");
-            if(white.isInCheckMate()) alert("black wins");
-            if(black.isInCheckMate()) alert("white wins");
+            checkForCheck();
 
             socket.emit("move", msg);
 
@@ -174,6 +178,19 @@ function mouseClicked() {
   drawGame();
 }
 
+function checkForCheck() {
+  //if(white.isInCheck()) console.log("white in check");
+  //if(black.isInCheck()) console.log("black in check");
+  if(myPlayer.isInCheck()) {
+    checkIndicator.style.backgroundColor = "#c92a45";
+  } else {
+    checkIndicator.style.backgroundColor = "black";
+  }
+  let op = myPlayer.isWhite ? black : white;
+  if(myPlayer.isInCheckMate()) console.log("You lose!");
+  if(op.isInCheckMate()) console.log("You win!");
+}
+
 function socketSetup() {
   socket.on("ready", startGame);
   socket.on("move", receiveMove);
@@ -183,16 +200,15 @@ function startGame(data) {
   ready = true;
   myPlayer = data.isWhite ? white : black;
 
-  drawGame();
+  turnIndicator.style.backgroundColor = myPlayer.isWhite?'#c98f2a':'black';
 
-  console.log("Game is ready!!!");
-  console.log("Am I white? "+data.isWhite);
+  drawGame();
   console.log("Game id: "+data.gameId);
 }
 
 function receiveMove(data) {
   whiteTurn = !whiteTurn;
-  console.log("whiteTurn turned to "+whiteTurn+", when remote moved");
+  turnIndicator.style.backgroundColor = '#c98f2a';
 
   //apply changes
   if(data.capture) {
@@ -245,6 +261,8 @@ function receiveMove(data) {
     newY: data.newY
   });
 
+  checkForCheck();
+
   drawGame();
 }
 
@@ -259,7 +277,7 @@ function drawBoard() {
   size = width/8;
   for(let i = 0; i < 8; i++) {
     for(let j = 0; j < 8; j++) {
-      if((i+j) % 2 == myPlayer.isWhite ? 0 : 1) {
+      if((i+j) % 2 == 0) {
         fill(255);
       } else {
         fill(100);

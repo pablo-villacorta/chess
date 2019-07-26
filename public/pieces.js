@@ -504,14 +504,6 @@ function addDiagonalMoves(am, piece) { //am = availableMoves list
   }
 }
 
-function chooseColor(isWhite) {
-  if(isWhite) {
-    fill(255,0,0);
-  } else {
-    fill(0,180,0);
-  }
-}
-
 Object.prototype.getName = function() {
    var funcNameRegex = /function (.{1,})\(/;
    var results = (funcNameRegex).exec((this).constructor.toString());

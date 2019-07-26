@@ -7,6 +7,36 @@
       body {
         background-color: #1f2021;
       }
+      #gamePanel {
+        position: relative;
+        position: fixed;
+        text-align: center;
+        display: flex;
+      }
+      .indicator {
+        margin-left: 2.5%;
+        background-color: black;
+        border-radius: 10%;
+        padding: 5px;
+        font-size: 10px;
+        vertical-align: center;
+      }
+      #turnIndicator {
+        height: 100px;
+      }
+      #checkIndicator {
+        height: 100px;
+      }
+      #turnIndicator h1 {
+        position: relative;
+        top: 35%;
+        transform: translateY(-50%);
+      }
+      #checkIndicator h1 {
+        position: relative;
+        top: 35%;
+        transform: translateY(-50%);
+      }
     </style>
   </head>
   <body>
@@ -15,6 +45,14 @@
     <script type="text/javascript" src="script.js"></script>
     <script type="text/javascript" src="pieces.js"></script>
     <script type="text/javascript" src="Player.js"></script>
-    <div id="gameContainer"></div>
+    <div id="gamePanel">
+      <div id="gameContainer"></div>
+      <div id="turnIndicator" class="indicator">
+        <h1>Your turn</h1>
+      </div>
+      <div id="checkIndicator" class="indicator">
+        <h1>Check!</h1>
+      </div>
+    </div>
   </body>
 </html>
