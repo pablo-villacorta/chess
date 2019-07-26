@@ -29,7 +29,11 @@ function Pawn(isWhite, x, y) {
   Piece.call(this, isWhite, x, y);
 
   this.draw = function() {
-    image(this.isWhite ? whitePawnImg : blackPawnImg, this.x*side+margin, this.y*side+margin, side*prop, side*prop);
+    if(myPlayer.isWhite) {
+      image(this.isWhite ? whitePawnImg : blackPawnImg, this.x*side+margin, this.y*side+margin, side*prop, side*prop);
+    } else {
+      image(this.isWhite ? whitePawnImg : blackPawnImg, (7-this.x)*side+margin, (7-this.y)*side+margin, side*prop, side*prop);
+    }
   };
 
   this.getAvailableMoves = function() {
@@ -60,12 +64,14 @@ function Pawn(isWhite, x, y) {
           let move = moveHistory[moveHistory.length-1];
           if(move.piece == getPieceAt(this.x+1, this.y) && Math.abs(move.newY-move.oldY) == 2) {
             am.push({x: this.x+1, y: this.y-1, check: false, capture: true});
+            console.log("yayy");
           }
         }
         if(!isFree(this.x-1, this.y)) {
           let move = moveHistory[moveHistory.length-1];
           if(move.piece == getPieceAt(this.x-1, this.y) && Math.abs(move.newY-move.oldY) == 2) {
             am.push({x: this.x-1, y: this.y-1, check: false, capture: true});
+            console.log("yayy");
           }
         }
       }
@@ -95,12 +101,14 @@ function Pawn(isWhite, x, y) {
           let move = moveHistory[moveHistory.length-1];
           if(move.piece == getPieceAt(this.x+1, this.y) && Math.abs(move.newY-move.oldY) == 2) {
             am.push({x: this.x+1, y: this.y+1, check: false, capture: true});
+            console.log("yayy");
           }
         }
         if(!isFree(this.x-1, this.y)) {
           let move = moveHistory[moveHistory.length-1];
           if(move.piece == getPieceAt(this.x-1, this.y) && Math.abs(move.newY-move.oldY) == 2) {
             am.push({x: this.x-1, y: this.y+1, check: false, capture: true});
+            console.log("yayy");
           }
         }
       }
@@ -114,7 +122,11 @@ function Rook(isWhite, x, y) {
   Piece.call(this, isWhite, x, y);
 
   this.draw = function() {
-    image(this.isWhite ? whiteRookImg : blackRookImg, this.x*side+margin, this.y*side+margin, side*prop, side*prop);
+    if(myPlayer.isWhite) {
+      image(this.isWhite ? whiteRookImg : blackRookImg, this.x*side+margin, this.y*side+margin, side*prop, side*prop);
+    } else {
+      image(this.isWhite ? whiteRookImg : blackRookImg, (7-this.x)*side+margin, (7-this.y)*side+margin, side*prop, side*prop);
+    }
   };
 
   this.getAvailableMoves = function() {
@@ -128,7 +140,11 @@ function Knight(isWhite, x, y) {
   Piece.call(this, isWhite, x, y);
 
   this.draw = function() {
-    image(this.isWhite ? whiteKnightImg : blackKnightImg, this.x*side+margin, this.y*side+margin, side*prop, side*prop);
+    if(myPlayer.isWhite) {
+      image(this.isWhite ? whiteKnightImg : blackKnightImg, this.x*side+margin, this.y*side+margin, side*prop, side*prop);
+    } else {
+      image(this.isWhite ? whiteKnightImg : blackKnightImg, (7-this.x)*side+margin, (7-this.y)*side+margin, side*prop, side*prop);
+    }
   };
 
   this.getAvailableMoves = function() {
@@ -166,7 +182,11 @@ function Bishop(isWhite, x, y) {
   Piece.call(this, isWhite, x, y);
 
   this.draw = function() {
-    image(this.isWhite ? whiteBishopImg : blackBishopImg, this.x*side+margin, this.y*side+margin, side*prop, side*prop);
+    if(myPlayer.isWhite) {
+      image(this.isWhite ? whiteBishopImg : blackBishopImg, this.x*side+margin, this.y*side+margin, side*prop, side*prop);
+    } else {
+      image(this.isWhite ? whiteBishopImg : blackBishopImg, (7-this.x)*side+margin, (7-this.y)*side+margin, side*prop, side*prop);
+    }
   };
 
   this.getAvailableMoves = function() {
@@ -180,7 +200,11 @@ function Queen(isWhite, x, y) {
   Piece.call(this, isWhite, x, y);
 
   this.draw = function() {
-    image(this.isWhite ? whiteQueenImg : blackQueenImg, this.x*side+margin, this.y*side+margin, side*prop, side*prop);
+    if(myPlayer.isWhite) {
+      image(this.isWhite ? whiteQueenImg : blackQueenImg, this.x*side+margin, this.y*side+margin, side*prop, side*prop);
+    } else {
+      image(this.isWhite ? whiteQueenImg : blackQueenImg, (7-this.x)*side+margin, (7-this.y)*side+margin, side*prop, side*prop);
+    }
   };
 
   this.getAvailableMoves = function() {
@@ -195,7 +219,11 @@ function King(isWhite, x, y) {
   Piece.call(this, isWhite, x, y);
 
   this.draw = function() {
-    image(this.isWhite ? whiteKingImg : blackKingImg, this.x*side+margin, this.y*side+margin, side*prop, side*prop);
+    if(myPlayer.isWhite) {
+      image(this.isWhite ? whiteKingImg : blackKingImg, this.x*side+margin, this.y*side+margin, side*prop, side*prop);
+    } else {
+      image(this.isWhite ? whiteKingImg : blackKingImg, (7-this.x)*side+margin, (7-this.y)*side+margin, side*prop, side*prop);
+    }
   };
 
   this.getAvailableMoves = function(ignoreCastling) {

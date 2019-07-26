@@ -203,34 +203,48 @@ function receiveMove(data) {
       pl.deletePieceAt(data.newX, data.newY);
     } else {
       //en passant
-
-    }
-  } else {
-    let p = getPieceAt(data.oldX, data.oldY);
-    p.x = data.newX;
-    p.y = data.newY;
-    if(data.castling) {
-      let pl = p.isWhite ? white : black;
-      if(pl.king.x > 4) {
-        //castling to the right
-
+      if(myPlayer.isWhite) {
+        myPlayer.deletePieceAt(data.newX, data.newY-1);
       } else {
-        //castling to the left
-
+        myPlayer.deletePieceAt(data.newX, data.newY+1);
       }
     }
-
+  }
+  let p = getPieceAt(data.oldX, data.oldY);
+  p.x = data.newX;
+  p.y = data.newY;
+  if(data.castling) {
     let pl = p.isWhite ? white : black;
-    if(data.promotion) {
-      pl.deletePieceAt(p.x, p.y);
-      let newPiece;
-      if(data.promotionType == "queen") newPiece = new Queen(p.isWhite, p.x, p.y);
-      if(data.promotionType == "knight") newPiece = new Knight(p.isWhite, p.x, p.y);
-      if(data.promotionType == "rook") newPiece = new Rook(p.isWhite, p.x, p.y);
-      if(data.promotionType == "bishop") newPiece = new Bishop(p.isWhite, p.x, p.y);
-      pl.pieces.push(newPiece);
+    if(pl.king.x > 4) {
+      //castling to the right
+      let r = getPieceAt(7, pl.king.y);
+      r.x = pl.king.x-1;
+    } else {
+      //castling to the left
+      let r = getPieceAt(0, pl.king.y);
+      r.x = pl.king.x+1;
     }
   }
+
+  let pl = p.isWhite ? white : black;
+  if(data.promotion) {
+    pl.deletePieceAt(p.x, p.y);
+    let newPiece;
+    if(data.promotionType == "queen") newPiece = new Queen(p.isWhite, p.x, p.y);
+    if(data.promotionType == "knight") newPiece = new Knight(p.isWhite, p.x, p.y);
+    if(data.promotionType == "rook") newPiece = new Rook(p.isWhite, p.x, p.y);
+    if(data.promotionType == "bishop") newPiece = new Bishop(p.isWhite, p.x, p.y);
+    pl.pieces.push(newPiece);
+  }
+
+  moveHistory.push({
+    piece: p,
+    oldX: data.oldX,
+    oldY: data.oldY,
+    newX: data.newX,
+    newY: data.newY
+  });
+
   drawGame();
 }
 
@@ -245,14 +259,20 @@ function drawBoard() {
   size = width/8;
   for(let i = 0; i < 8; i++) {
     for(let j = 0; j < 8; j++) {
-      if((i+j) % 2 == 0) {
+      if((i+j) % 2 == myPlayer.isWhite ? 0 : 1) {
         fill(255);
       } else {
         fill(100);
       }
       if(selectedTile) {
-        if(i == selectedTile.y && j == selectedTile.x) {
-          fill(50,100,255);
+        if(myPlayer.isWhite) {
+          if(i == selectedTile.y && j == selectedTile.x) {
+            fill(50,100,255);
+          }
+        } else {
+          if(i == 7-selectedTile.y && j == 7-selectedTile.x) {
+            fill(50,100,255);
+          }
         }
       }
       rect(j*size, i*size, size, size);
@@ -267,7 +287,11 @@ function drawBoard() {
       } else {
         fill(83, 165, 237, 190);
       }
-      rect(availableMoves[i].x*size, availableMoves[i].y*size, size, size);
+      if(myPlayer.isWhite) {
+        rect(availableMoves[i].x*size, availableMoves[i].y*size, size, size);
+      } else {
+        rect((7-availableMoves[i].x)*size, (7-availableMoves[i].y)*size, size, size);
+      }
     }
   }
 }
@@ -279,6 +303,11 @@ function getPointedTile() {
 
   x = Math.floor(8*mouseX/width);
   y = Math.floor(8*mouseY/height);
+
+  if(!myPlayer.isWhite) {
+    x = 7-x;
+    y = 7-y;
+  }
 
   return {x: x, y: y};
 }
