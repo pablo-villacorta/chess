@@ -45,9 +45,10 @@ function setup() {
   turnIndicator = document.getElementById("turnIndicator");
   checkIndicator = document.getElementById("checkIndicator");
 
-  let ip = prompt("Game server IP address?");
+  //let ip = prompt("Game server IP address?");
+  ip = "localhost";
 
-  socket = io.connect("http://"+ip+":25567");
+  socket = io.connect("http://"+ip+":3000");
 
   side = width/8;
   margin = side*(1-prop)/2;
@@ -196,6 +197,12 @@ function checkForCheck() {
 function socketSetup() {
   socket.on("ready", startGame);
   socket.on("move", receiveMove);
+  socket.on("opDisconnected", opDisconnected);
+}
+
+function opDisconnected() {
+  alert("The opponent disconnected, you win!");
+  console.log("The opponent disconnected, you win!");
 }
 
 function startGame(data) {
