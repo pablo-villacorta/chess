@@ -40,6 +40,19 @@ function newConnection(socket) {
   socket.on("move", function(data) {
     p.broadcastMove(data);
   });
+  socket.on("drawOffer", function() {
+    let opp = p.isWhite ? p.game.black:p.game.white;
+    opp.socket.emit("drawOffer", {});
+  });
+  socket.on("drawAccepted", function() {
+    let opp = p.isWhite ? p.game.black : p.game.white;
+    opp.socket.emit("drawAccepted", {});
+    p.game.hasEnded = true;
+  });
+  socket.on("drawDeclined", function() {
+    let opp = p.isWhite ? p.game.black : p.game.white;
+    opp.socket.emit("drawDeclined", {});
+  });
   socket.on("resign", function(data) {
     if(p.game.hasEnded) return;
     let op = p.isWhite?p.game.black:p.game.white;

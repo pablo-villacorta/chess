@@ -19,9 +19,11 @@ let myPlayer;
 
 let turnIndicator, checkIndicator, checkMateIndicator;
 let resignIndicator, rematchIndicator, newOpponentIndicator;
-let acceptIndicator, declineIndicator;
+let drawOfferIndicator, acceptIndicator, declineIndicator;
+let drawIndicator;
 
 let rematchProposalFlag = false;
+let drawOfferFlag = false;
 
 function preload() {
   blackBishopImg = loadImage("sprites/blackBishop.png");
@@ -51,7 +53,8 @@ function setup() {
   newOpponentIndicator = document.getElementById("newOpponentIndicator");
   acceptIndicator = document.getElementById("drawOfferAcceptIndicator");
   declineIndicator = document.getElementById("drawOfferDeclineIndicator");
-
+  drawOfferIndicator = document.getElementById("drawOfferIndicator");
+  drawIndicator = document.getElementById("drawIndicator");
 
   //let ip = prompt("Game server IP address?");
   ip = "localhost";
@@ -90,6 +93,7 @@ function mouseClicked() {
             whiteTurn = !whiteTurn;
             turnIndicator.style.backgroundColor = "black";
             resignIndicator.style.backgroundColor = "black";
+            drawOfferIndicator.style.backgroundColor = "black";
 
             let msg = {
               oldX: selectedTile.x,
@@ -169,7 +173,7 @@ function mouseClicked() {
               }
             }
 
-            checkForCheck();
+            checkForEnd();
 
             socket.emit("move", msg);
 
@@ -188,6 +192,20 @@ function mouseClicked() {
     }
   }
   drawGame();
+}
+
+function checkForEnd() {
+  checkForCheck();
+  if(!end) {
+    //check for stalemate
+    let t = whiteTurn ? white : black;
+    if(!t.isInCheck() && t.getTotalAmountOfAvailableMoves() == 0) {
+      //stalemate
+      drawIndicator.style.backgroundColor = "#9e63b0";
+      gameEnd();
+      socket.emit("gameHasEnded", {reason: "stalemate"});
+    }
+  }
 }
 
 function checkForCheck() {
@@ -230,10 +248,10 @@ function resign() {
 }
 
 function offeraDraw() {
-  if(!ready || end) return;
+  if(!ready || end || myPlayer.isWhite != whiteTurn) return;
   let ans = confirm("Do you want to offer a draw?");
   if(ans) {
-    //TODO
+    socket.emit("drawOffer", {});
   }
 }
 
@@ -244,8 +262,12 @@ function accept() {
     reset();
     rematchProposalFlag = false;
 
-  } else {
+  } else if(drawOfferFlag) {
     //accept the draw
+    socket.emit("drawAccepted", {});
+    drawOfferFlag = false;
+    drawIndicator.style.backgroundColor = "#9e63b0";
+    gameEnd();
   }
   acceptIndicator.style.backgroundColor = "black";
   declineIndicator.style.backgroundColor = "black";
@@ -255,18 +277,23 @@ function decline() {
   if(rematchProposalFlag) {
     //decline the rematch
     socket.emit("rematchDeclined", {});
+    rematchProposalFlag = false;
   } else {
     //decline the draw
+    socket.emit("drawDeclined", {});
+    drawOfferFlag = false;
   }
   acceptIndicator.style.backgroundColor = "black";
   declineIndicator.style.backgroundColor = "black";
 }
 
 function rematchProposal() {
+  if(!end || !ready) return;
   socket.emit("rematchProposal", {});
 }
 
 function newOpponent() {
+  if(!end || !ready) return;
   socket.emit("newOpponent", {});
   reset();
 }
@@ -294,6 +321,20 @@ function socketSetup() {
     alert("Your opponent accepted to have a rematch");
     reset();
   });
+  socket.on("drawOffer", function() {
+    alert("Your opponent has offered you a draw. Accept it or decline it.");
+    drawOfferFlag = true;
+    acceptIndicator.style.backgroundColor = "#43bf9a";
+    declineIndicator.style.backgroundColor = "#d96a8b";
+  });
+  socket.on("drawAccepted", function() {
+    alert("Your opponent has accepted your draw offer.");
+    gameEnd();
+    drawIndicator.style.backgroundColor = "#9e63b0";
+  });
+  socket.on("drawDeclined", function() {
+    alert("Your opponent has declined your draw offer.");
+  });
   socket.on("opDisconnected", opDisconnected);
 }
 
@@ -307,22 +348,25 @@ function startGame(data) {
   ready = true;
   white = new Player("white", true);
   black = new Player("black", false);
+  whiteTurn = true;
 
   myPlayer = data.isWhite ? white : black;
 
   turnIndicator.style.backgroundColor = myPlayer.isWhite?'#c98f2a':'black';
   resignIndicator.style.backgroundColor = myPlayer.isWhite?"#4766a1":"black";
+  drawOfferIndicator.style.backgroundColor = myPlayer.isWhite?"#439c4d":black;
+  drawIndicator.style.backgroundColor = "black";
   rematchIndicator.style.backgroundColor = "black";
   newOpponentIndicator.style.backgroundColor = "black";
 
   drawGame();
-  console.log("Game id: "+data.gameId);
 }
 
 function receiveMove(data) {
   whiteTurn = !whiteTurn;
   turnIndicator.style.backgroundColor = '#c98f2a';
   resignIndicator.style.backgroundColor = "#4766a1";
+  drawOfferIndicator.style.backgroundColor = "#439c4d";
 
   //apply changes
   if(data.capture) {
@@ -375,7 +419,7 @@ function receiveMove(data) {
     newY: data.newY
   });
 
-  checkForCheck();
+  checkForEnd();
 
   drawGame();
 }
@@ -386,7 +430,7 @@ function gameEnd() {
   checkIndicator.style.backgroundColor = "black";
   checkMateIndicator.style.backgroundColor = "black";
   resignIndicator.style.backgroundColor = "black";
-  //drawOfferIndicator.style.backgroundColor = "black";
+  drawOfferIndicator.style.backgroundColor = "black";
   rematchIndicator.style.backgroundColor = "#af84bf";
   newOpponentIndicator.style.backgroundColor = "#8ceaed";
 }
@@ -396,7 +440,7 @@ function turnOffIndicators() {
   checkIndicator.style.backgroundColor = "black";
   checkMateIndicator.style.backgroundColor = "black";
   resignIndicator.style.backgroundColor = "black";
-  //turnIndicator.style.backgroundColor = "black";
+  drawOfferIndicator.style.backgroundColor = "black";
 }
 
 function drawGame() {

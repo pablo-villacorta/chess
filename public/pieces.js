@@ -40,7 +40,7 @@ function Pawn(isWhite, x, y) {
     let am = [];
     if(this.isWhite) {
       if(this.y == 6) { //initial tile
-        if(isFree(this.x, this.y-2)) {
+        if(isFree(this.x, this.y-2) && isFree(this.x, this.y-1)) {
           am.push({x:this.x, y:this.y-2, check:false, capture: false});
         }
       }
@@ -64,20 +64,18 @@ function Pawn(isWhite, x, y) {
           let move = moveHistory[moveHistory.length-1];
           if(move.piece == getPieceAt(this.x+1, this.y) && Math.abs(move.newY-move.oldY) == 2) {
             am.push({x: this.x+1, y: this.y-1, check: false, capture: true});
-            console.log("yayy");
           }
         }
         if(!isFree(this.x-1, this.y)) {
           let move = moveHistory[moveHistory.length-1];
           if(move.piece == getPieceAt(this.x-1, this.y) && Math.abs(move.newY-move.oldY) == 2) {
             am.push({x: this.x-1, y: this.y-1, check: false, capture: true});
-            console.log("yayy");
           }
         }
       }
     } else {
       if(this.y == 1) { //initial tile
-        if(isFree(this.x, this.y+2)) {
+        if(isFree(this.x, this.y+2) && isFree(this.x, this.y+1)) {
           am.push({x:this.x, y:this.y+2, check:false, capture: false});
         }
       }
@@ -101,14 +99,12 @@ function Pawn(isWhite, x, y) {
           let move = moveHistory[moveHistory.length-1];
           if(move.piece == getPieceAt(this.x+1, this.y) && Math.abs(move.newY-move.oldY) == 2) {
             am.push({x: this.x+1, y: this.y+1, check: false, capture: true});
-            console.log("yayy");
           }
         }
         if(!isFree(this.x-1, this.y)) {
           let move = moveHistory[moveHistory.length-1];
           if(move.piece == getPieceAt(this.x-1, this.y) && Math.abs(move.newY-move.oldY) == 2) {
             am.push({x: this.x-1, y: this.y+1, check: false, capture: true});
-            console.log("yayy");
           }
         }
       }
