@@ -12,30 +12,88 @@
         position: fixed;
         text-align: center;
         display: flex;
+        /*background-color: pink;*/
       }
       .indicator {
         margin-left: 2.5%;
         background-color: black;
-        border-radius: 10%;
+        border-radius: 10px;
         padding: 5px;
         font-size: 10px;
         vertical-align: center;
+        border: solid;
+        border-width: 1px;
+        margin-top: 10px;
+        margin-left: 10px;
+        margin-right: 10px;
+        height: 90px;
       }
       #turnIndicator {
-        height: 100px;
+        margin-top: 0;
+        /*background-color: #c98f2a;*/
       }
       #checkIndicator {
-        height: 100px;
+        /*background-color: #c92a45;*/
+        margin-right: 0;
       }
-      #turnIndicator h1 {
+      .indicator h1 {
         position: relative;
         top: 35%;
         transform: translateY(-50%);
       }
-      #checkIndicator h1 {
+      #checkMateIndicator {
+        /*background-color: #c92a45;*/
+      }
+      #checkIndicatorContainer {
+        display: flex;
+      }
+      #resignIndicator {
+        /*background-color: #4766a1;*/
+        cursor: pointer;
+      }
+      #drawIndicator {
+        /*background-color: #9e63b0;*/
+      }
+      #drawOfferContainer {
+        display: flex;
+      }
+      #drawOfferIndicator {
+        /*background-color: #439c4d;*/
+        margin-right: 2px;
+        cursor: pointer;
+      }
+      #drawOfferAcceptIndicator {
+        height: 34px;
+        /*background-color: #43bf9a;*/
+        cursor: pointer;
+      }
+      #drawOfferDeclineIndicator {
+        height: 34px;
+        /*background-color: #d96a8b;*/
+        cursor: pointer;
+      }
+      #drawOfferAcceptIndicator h1 {
         position: relative;
-        top: 35%;
+        top: 10%;
         transform: translateY(-50%);
+      }
+      #drawOfferDeclineIndicator h1 {
+        position: relative;
+        top: 10%;
+        transform: translateY(-50%);
+      }
+      #rematchIndicator {
+        margin: 0;
+        display: inline-block;
+        /*background-color: #af84bf;*/
+        cursor: pointer;
+      }
+      #newOpponentIndicator {
+        margin-top: 0;
+        margin-left: 5px;
+        display: inline-block;
+        /*background-color: #8ceaed;*/
+        cursor: pointer;
       }
     </style>
   </head>
@@ -47,11 +105,48 @@
     <script type="text/javascript" src="Player.js"></script>
     <div id="gamePanel">
       <div id="gameContainer"></div>
-      <div id="turnIndicator" class="indicator">
-        <h1>Your turn</h1>
+      <div id="indicatorsContainer">
+        <div id="turnIndicator" class="indicator">
+          <h1>Your turn</h1>
+        </div>
+        <div id="checkIndicatorContainer">
+          <div id="checkIndicator" class="indicator">
+            <h1>Check!</h1>
+          </div>
+          <div id="checkMateIndicator" class="indicator">
+            <h1>Mate!</h1>
+          </div>
+        </div>
+        <div id="drawIndicator" class="indicator">
+          <h1>It's a draw!</h1>
+        </div>
+        <div id="drawOfferContainer">
+          <div id="drawOfferIndicator" class="indicator" onclick="offeraDraw();">
+            <h1>Offer<br> a<br> draw</h1>
+          </div>
+          <div id="drawOfferResponseContainer">
+            <div id="drawOfferAcceptIndicator" class="indicator" onclick="accept();">
+              <h1>Accept</h1>
+            </div>
+            <div id="drawOfferDeclineIndicator" class="indicator" onclick="decline();">
+              <h1>Decline</h1>
+            </div>
+          </div>
+        </div>
+        <div id="resignIndicator" class="indicator" onclick="resign();">
+          <h1>Resign</h1>
+        </div>
       </div>
-      <div id="checkIndicator" class="indicator">
-        <h1>Check!</h1>
+      <div id="leftPanel">
+        <div id="replayPanel">
+          <div id="rematchIndicator" class="indicator" onclick="rematchProposal();">
+            <h1>Rematch</h1>
+          </div>
+          <div id="newOpponentIndicator" class="indicator" onclick="newOpponent();">
+            <h1>Play against a new opponent</h1>
+          </div>
+        </div>
+        <div id="leftBottomPanel"></div>
       </div>
     </div>
   </body>

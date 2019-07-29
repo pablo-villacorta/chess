@@ -13,11 +13,15 @@ let side, margin;
 let prop = 0.6;
 
 let socket;
-let ready = false;
+let ready = false, end = false;
 
 let myPlayer;
 
-let turnIndicator, checkIndicator;
+let turnIndicator, checkIndicator, checkMateIndicator;
+let resignIndicator, rematchIndicator, newOpponentIndicator;
+let acceptIndicator, declineIndicator;
+
+let rematchProposalFlag = false;
 
 function preload() {
   blackBishopImg = loadImage("sprites/blackBishop.png");
@@ -37,13 +41,17 @@ function preload() {
 function setup() {
   let canvas = createCanvas(550, 550);
   canvas.parent("gameContainer");
-  background(0);
-  fill(255);
-  textAlign(CENTER);
-  text("Waiting for an opponent...", width/2, height/2);
+  drawWaitingScreen();
 
   turnIndicator = document.getElementById("turnIndicator");
   checkIndicator = document.getElementById("checkIndicator");
+  checkMateIndicator = document.getElementById("checkMateIndicator");
+  resignIndicator = document.getElementById("resignIndicator");
+  rematchIndicator = document.getElementById("rematchIndicator");
+  newOpponentIndicator = document.getElementById("newOpponentIndicator");
+  acceptIndicator = document.getElementById("drawOfferAcceptIndicator");
+  declineIndicator = document.getElementById("drawOfferDeclineIndicator");
+
 
   //let ip = prompt("Game server IP address?");
   ip = "localhost";
@@ -65,7 +73,7 @@ function setup() {
 function draw() {}
 
 function mouseClicked() {
-  if(!ready) return;
+  if(!ready || end) return;
   let t = getPointedTile();
   if(t) {
     if(selectedTile && t.x == selectedTile.x && t.y == selectedTile.y) {
@@ -80,7 +88,8 @@ function mouseClicked() {
             let p = getPieceAt(selectedTile.x, selectedTile.y);
 
             whiteTurn = !whiteTurn;
-            turnIndicator.style.backgroundColor = 'black';
+            turnIndicator.style.backgroundColor = "black";
+            resignIndicator.style.backgroundColor = "black";
 
             let msg = {
               oldX: selectedTile.x,
@@ -182,34 +191,129 @@ function mouseClicked() {
 }
 
 function checkForCheck() {
-  //if(white.isInCheck()) console.log("white in check");
-  //if(black.isInCheck()) console.log("black in check");
+  let op = myPlayer.isWhite ? black : white;
   if(myPlayer.isInCheck()) {
     checkIndicator.style.backgroundColor = "#c92a45";
+  } else if(op.isInCheck()) {
+    checkIndicator.style.backgroundColor = "#34eb5e";
   } else {
     checkIndicator.style.backgroundColor = "black";
   }
-  let op = myPlayer.isWhite ? black : white;
-  if(myPlayer.isInCheckMate()) alert("You lose!");
-  if(op.isInCheckMate()) alert("You win!");
+  if(myPlayer.isInCheckMate()) {
+    checkMateIndicator.style.backgroundColor = "#c92a45";
+    resignIndicator.style.backgroundColor = "black";
+    socket.emit("gameHasEnded", {
+      reason: "checkmate"
+    });
+    alert("You lose");
+    gameEnd();
+  } else if(op.isInCheckMate()) {
+    checkMateIndicator.style.backgroundColor = "#34eb5e";
+    socket.emit("gameHasEnded", {
+      reason: "checkmate"
+    });
+    alert("You win!");
+    gameEnd();
+  } else {
+    checkMateIndicator.style.backgroundColor = "black";
+  }
+}
+
+function resign() {
+  if(!ready || myPlayer.isWhite != whiteTurn || end) return;
+  let ans = confirm("Do you really want to resign?");
+  if(ans) {
+    //TODO
+    socket.emit("resign", {});
+    gameEnd();
+  }
+}
+
+function offeraDraw() {
+  if(!ready || end) return;
+  let ans = confirm("Do you want to offer a draw?");
+  if(ans) {
+    //TODO
+  }
+}
+
+function accept() {
+  if(rematchProposalFlag) {
+    //accept the rematch
+    socket.emit("rematchAccepted", {});
+    reset();
+    rematchProposalFlag = false;
+
+  } else {
+    //accept the draw
+  }
+  acceptIndicator.style.backgroundColor = "black";
+  declineIndicator.style.backgroundColor = "black";
+}
+
+function decline() {
+  if(rematchProposalFlag) {
+    //decline the rematch
+    socket.emit("rematchDeclined", {});
+  } else {
+    //decline the draw
+  }
+  acceptIndicator.style.backgroundColor = "black";
+  declineIndicator.style.backgroundColor = "black";
+}
+
+function rematchProposal() {
+  socket.emit("rematchProposal", {});
+}
+
+function newOpponent() {
+  socket.emit("newOpponent", {});
+  reset();
 }
 
 function socketSetup() {
   socket.on("ready", startGame);
   socket.on("move", receiveMove);
+  socket.on("resign", function() {
+    alert("You win! Your opponent resigned!");
+    turnOffIndicators();
+    rematchIndicator.style.backgroundColor = "#af84bf";
+    newOpponentIndicator.style.backgroundColor = "#8ceaed";
+  });
+  socket.on("rematchProposal", function() {
+    alert("Your opponent wants to have a rematch. Accept or decline the offer.");
+    rematchProposalFlag = true;
+    //accept or decline using the buttons on the screen
+    acceptIndicator.style.backgroundColor = "#43bf9a";
+    declineIndicator.style.backgroundColor = "#d96a8b";
+  });
+  socket.on("rematchDeclined", function() {
+    alert("Your opponent does not want a rematch");
+  });
+  socket.on("rematchAccepted", function() {
+    alert("Your opponent accepted to have a rematch");
+    reset();
+  });
   socket.on("opDisconnected", opDisconnected);
 }
 
 function opDisconnected() {
   alert("The opponent disconnected, you win!");
   console.log("The opponent disconnected, you win!");
+  gameEnd();
 }
 
 function startGame(data) {
   ready = true;
+  white = new Player("white", true);
+  black = new Player("black", false);
+
   myPlayer = data.isWhite ? white : black;
 
   turnIndicator.style.backgroundColor = myPlayer.isWhite?'#c98f2a':'black';
+  resignIndicator.style.backgroundColor = myPlayer.isWhite?"#4766a1":"black";
+  rematchIndicator.style.backgroundColor = "black";
+  newOpponentIndicator.style.backgroundColor = "black";
 
   drawGame();
   console.log("Game id: "+data.gameId);
@@ -218,6 +322,7 @@ function startGame(data) {
 function receiveMove(data) {
   whiteTurn = !whiteTurn;
   turnIndicator.style.backgroundColor = '#c98f2a';
+  resignIndicator.style.backgroundColor = "#4766a1";
 
   //apply changes
   if(data.capture) {
@@ -275,6 +380,25 @@ function receiveMove(data) {
   drawGame();
 }
 
+function gameEnd() {
+  end = true;
+  turnIndicator.style.backgroundColor = "black";
+  checkIndicator.style.backgroundColor = "black";
+  checkMateIndicator.style.backgroundColor = "black";
+  resignIndicator.style.backgroundColor = "black";
+  //drawOfferIndicator.style.backgroundColor = "black";
+  rematchIndicator.style.backgroundColor = "#af84bf";
+  newOpponentIndicator.style.backgroundColor = "#8ceaed";
+}
+
+function turnOffIndicators() {
+  turnIndicator.style.backgroundColor = "black";
+  checkIndicator.style.backgroundColor = "black";
+  checkMateIndicator.style.backgroundColor = "black";
+  resignIndicator.style.backgroundColor = "black";
+  //turnIndicator.style.backgroundColor = "black";
+}
+
 function drawGame() {
   drawBoard();
   white.drawPieces();
@@ -321,6 +445,23 @@ function drawBoard() {
       }
     }
   }
+}
+
+function reset() {
+  drawWaitingScreen();
+  turnOffIndicators();
+  ready = false;
+  myPlayer = undefined;
+  white = undefined;
+  black = undefined;
+  end = false;
+}
+
+function drawWaitingScreen() {
+  background(0);
+  fill(255);
+  textAlign(CENTER);
+  text("Waiting for an opponent...", width/2, height/2);
 }
 
 function getPointedTile() {

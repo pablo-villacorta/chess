@@ -14,40 +14,101 @@ console.log("server running!");
 var io = socket(server);
 io.sockets.on("connection", newConnection);
 
-let lastPlayer;
-let games = [];
+let queue = [];
 
 function newConnection(socket) {
   console.log("someone connected");
   let p = new Player(socket, true);
-  if(lastPlayer) { //two available players
-    games.push(new Game(lastPlayer, p));
-    let g = games[games.length-1];
+  if(queue.length > 0) { //two available players
+    let lastPlayer = queue[0];
+    queue.splice(0, 1);
+    let g = new Game(lastPlayer, p);
     g.white.game = g;
     g.black.game = g;
 
     //emit ready message
     g.white.socket.emit("ready", {
-      isWhite: true,
-      gameId: games.length-1
+      isWhite: true
     })
     g.black.socket.emit("ready", {
-      isWhite: false,
-      gameId: games.length-1
+      isWhite: false
     });
-
-    lastPlayer = undefined;
   } else {
-    lastPlayer = p;
-    //emit waiting message
+    queue.push(p);
     p.socket.emit("wait", {});
   }
   socket.on("move", function(data) {
     p.broadcastMove(data);
   });
+  socket.on("resign", function(data) {
+    if(p.game.hasEnded) return;
+    let op = p.isWhite?p.game.black:p.game.white;
+    op.socket.emit("resign", {});
+    p.game.hasEnded = true;
+  });
+  socket.on("gameHasEnded", function(data) {
+    p.game.hasEnded = true;
+  });
+  socket.on("rematchProposal", function(data) {
+    let op = p.isWhite ? p.game.black:p.game.white;
+    if(op.searchingNewOpponent) {
+      p.socket.emit("rematchDeclined", {});
+    }
+    op.socket.emit("rematchProposal", data);
+  });
+  socket.on("rematchDeclined", function() {
+    let op = p.isWhite ? p.game.black:p.game.white;
+    op.socket.emit("rematchDeclined", {});
+  });
+  socket.on("rematchAccepted", function() {
+    let opp = p.isWhite ? p.game.black:p.game.white;
+    opp.socket.emit("rematchAccepted", {});
+
+    //change
+    let op = p.isWhite ? p.game.black : p.game.white;
+    let g = new Game(p, op);
+    g.white.game = g;
+    g.black.game = g;
+
+    //emit ready message
+    g.white.socket.emit("ready", {
+      isWhite: true
+    })
+    g.black.socket.emit("ready", {
+      isWhite: false
+    });
+  });
+  socket.on("newOpponent", function() {
+    let opp = p.isWhite ? p.game.black : p.game.white;
+    let done = false;
+    for(let i = 0; i < queue.length; i++) {
+      if(opp.socket.id != queue[i].socket.id) {
+        //play with this guy
+        let o = queue[0];
+        queue.splice(0, 1);
+        let g = new Game(p, o);
+        g.white.game = g;
+        g.black.game = g;
+
+        g.white.socket.emit("ready", {
+          isWhite: true
+        })
+        g.black.socket.emit("ready", {
+          isWhite: false
+        });
+
+        done = true;
+      }
+    }
+    if(!done) {
+      queue.push(p);
+    }
+  });
   socket.on("disconnect", function() {
     console.log("someone disconnected");
+    if(p.game.hasEnded) return;
     p.disconnect();
+    p.game.hasEnded = true;
   });
 }
 
@@ -55,6 +116,7 @@ function Player(socket, isWhite) {
   this.isWhite = isWhite;
   this.socket = socket;
   this.game = undefined;
+  this.searchingNewOpponent = false;
 
   this.broadcastMove = function(data) {
     if(this.game.moves % 2 == 0) {
@@ -66,16 +128,8 @@ function Player(socket, isWhite) {
   }
 
   this.disconnect = function() {
-    console.log("games: "+games.length);
-    if(games.length == 0) return;
-    if(this.game.white.socket.id == this.socket.id || this.game.black.socket.id == this.socket.id) {
-      console.log("first player to leave");
-      let op = this.isWhite ? this.game.black : this.game.white;
-      op.socket.emit("opDisconnected", {});
-      games.splice(this.game.getPos(), 1);
-    } else {
-      console.log("second player to leave");
-    }
+    let op = this.isWhite ? this.game.black : this.game.white;
+    op.socket.emit("opDisconnected", {});
   }
 }
 
@@ -85,17 +139,12 @@ function Game(player1, player2) {
   this.moves = 0;
   this.white = p1;
   this.black = p2;
+  this.hasEnded = false;
+
   if(Math.random() > .5) {
     this.white = p2;
     this.black = p1;
   }
   this.white.isWhite = true;
   this.black.isWhite = false;
-
-  this.getPos = function() {
-    for(let i = 0; i < games.length; i++) {
-      if(games[i] == this) return i;
-    }
-    return -1;
-  }
 }
