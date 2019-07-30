@@ -1,0 +1,92 @@
+body {
+  background-color: #1f2021;
+}
+#gamePanel {
+  position: relative;
+  position: fixed;
+  text-align: center;
+  display: flex;
+  /*background-color: pink;*/
+}
+.indicator {
+  color: black;
+  margin-left: 2.5%;
+  background-color: black;
+  border-radius: 10px;
+  padding: 5px;
+  font-size: 10px;
+  vertical-align: center;
+  border: solid;
+  border-width: 1px;
+  margin-top: 10px;
+  margin-left: 10px;
+  margin-right: 10px;
+  height: 90px;
+}
+#turnIndicator {
+  margin-top: 0;
+  /*background-color: #c98f2a;*/
+}
+#checkIndicator {
+  /*background-color: #c92a45;*/
+  margin-right: 0;
+}
+.indicator h1 {
+  position: relative;
+  top: 35%;
+  transform: translateY(-50%);
+}
+#checkMateIndicator {
+  /*background-color: #c92a45;*/
+}
+#checkIndicatorContainer {
+  display: flex;
+}
+#resignIndicator {
+  /*background-color: #4766a1;*/
+  cursor: pointer;
+}
+#drawIndicator {
+  /*background-color: #9e63b0;*/
+}
+#drawOfferContainer {
+  display: flex;
+}
+#drawOfferIndicator {
+  /*background-color: #439c4d;*/
+  margin-right: 2px;
+  cursor: pointer;
+}
+#drawOfferAcceptIndicator {
+  height: 34px;
+  /*background-color: #43bf9a;*/
+  cursor: pointer;
+}
+#drawOfferDeclineIndicator {
+  height: 34px;
+  /*background-color: #d96a8b;*/
+  cursor: pointer;
+}
+#drawOfferAcceptIndicator h1 {
+  position: relative;
+  top: 10%;
+  transform: translateY(-50%);
+}
+#drawOfferDeclineIndicator h1 {
+  position: relative;
+  top: 10%;
+  transform: translateY(-50%);
+}
+#rematchIndicator {
+  margin: 0;
+  display: inline-block;
+  /*background-color: #af84bf;*/
+  cursor: pointer;
+}
+#newOpponentIndicator {
+  margin-top: 0;
+  margin-left: 5px;
+  display: inline-block;
+  /*background-color: #8ceaed;*/
+  cursor: pointer;
+}

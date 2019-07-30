@@ -17,26 +17,34 @@ io.sockets.on("connection", newConnection);
 let queue = [];
 
 function newConnection(socket) {
-  console.log("someone connected");
+  //console.log("someone connected");
   let p = new Player(socket, true);
-  if(queue.length > 0) { //two available players
-    let lastPlayer = queue[0];
-    queue.splice(0, 1);
-    let g = new Game(lastPlayer, p);
-    g.white.game = g;
-    g.black.game = g;
 
-    //emit ready message
-    g.white.socket.emit("ready", {
-      isWhite: true
-    })
-    g.black.socket.emit("ready", {
-      isWhite: false
-    });
-  } else {
-    queue.push(p);
-    p.socket.emit("wait", {});
-  }
+  socket.on("nickname", function(data) {
+    p.nickname = data.nickname;
+    console.log(p.nickname+" connected");
+
+    if(queue.length > 0) { //two available players
+      let lastPlayer = queue[0];
+      queue.splice(0, 1);
+      let g = new Game(lastPlayer, p);
+      g.white.game = g;
+      g.black.game = g;
+
+      //emit ready message
+      g.white.socket.emit("ready", {
+        isWhite: true,
+        opNickname: g.black.nickname
+      })
+      g.black.socket.emit("ready", {
+        isWhite: false,
+        opNickname: g.white.nickname
+      });
+    } else {
+      queue.push(p);
+      //p.socket.emit("wait", {});
+    }
+  });
   socket.on("move", function(data) {
     p.broadcastMove(data);
   });
@@ -117,6 +125,10 @@ function newConnection(socket) {
       queue.push(p);
     }
   });
+  socket.on("chat", function(data) {
+    let opp = p.isWhite ? p.game.black : p.game.white;
+    opp.socket.emit("chat", data);
+  });
   socket.on("disconnect", function() {
     console.log("someone disconnected");
     if(p.game.hasEnded) return;
@@ -127,6 +139,7 @@ function newConnection(socket) {
 
 function Player(socket, isWhite) {
   this.isWhite = isWhite;
+  this.nickname = "emptyname";
   this.socket = socket;
   this.game = undefined;
   this.searchingNewOpponent = false;

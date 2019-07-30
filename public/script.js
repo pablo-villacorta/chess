@@ -25,6 +25,8 @@ let drawIndicator;
 let rematchProposalFlag = false;
 let drawOfferFlag = false;
 
+let nickname;
+
 function preload() {
   blackBishopImg = loadImage("sprites/blackBishop.png");
   blackKingImg = loadImage("sprites/blackKing.png");
@@ -45,6 +47,8 @@ function setup() {
   canvas.parent("gameContainer");
   drawWaitingScreen();
 
+  nickname = prompt("Enter your nickname:");
+
   turnIndicator = document.getElementById("turnIndicator");
   checkIndicator = document.getElementById("checkIndicator");
   checkMateIndicator = document.getElementById("checkMateIndicator");
@@ -56,10 +60,14 @@ function setup() {
   drawOfferIndicator = document.getElementById("drawOfferIndicator");
   drawIndicator = document.getElementById("drawIndicator");
 
+  textInput = document.getElementById("textInput");
+  chatbox = document.getElementById("cb-body");
+
   //let ip = prompt("Game server IP address?");
   ip = "localhost";
 
   socket = io.connect("http://"+ip+":3000");
+  socket.emit("nickname", {nickname: nickname});
 
   side = width/8;
   margin = side*(1-prop)/2;
@@ -335,6 +343,9 @@ function socketSetup() {
   socket.on("drawDeclined", function() {
     alert("Your opponent has declined your draw offer.");
   });
+  socket.on("chat", function(data) {
+    addRemoteMessage(data.text);
+  });
   socket.on("opDisconnected", opDisconnected);
 }
 
@@ -351,6 +362,12 @@ function startGame(data) {
   whiteTurn = true;
 
   myPlayer = data.isWhite ? white : black;
+
+  let op = myPlayer.isWhite ? black : white;
+  op.name = data.opNickname;
+
+  document.getElementById("opponentName").innerHTML = "@"+op.name;
+
 
   turnIndicator.style.backgroundColor = myPlayer.isWhite?'#c98f2a':'black';
   resignIndicator.style.backgroundColor = myPlayer.isWhite?"#4766a1":"black";

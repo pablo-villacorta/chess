@@ -1,0 +1,88 @@
+body {
+  background-color: #1f2021;
+  font-family: 'Open Sans', sans-serif;
+  font-size: 11pt;
+}
+
+.chatbox {
+  background-color: white;
+  width: 97.5%;
+  border-radius: 10px;
+}
+
+.cb-header {
+  background-color: #4287f5;
+  border-top-left-radius: 10px;
+  border-top-right-radius: 10px;
+  border-top: solid 1px black;
+}
+
+.cb-header h2 {
+  padding: 10px 10px;
+  text-align: left;
+}
+
+.cb-body {
+  height: 287px;
+  overflow-y: auto;
+}
+
+.cb-received-msg {
+  width: 57%;
+  margin-left: 10px;
+}
+
+.cb-received-msg p {
+  background-color: #d2d4d6;
+  border-radius: 10px;
+  padding: 10px;
+  margin-top: 5px;
+  margin-bottom: 7px;
+  text-align: left;
+}
+
+.cb-sent-msg {
+  width: 57%;
+  margin-left: 41%;
+}
+
+.cb-sent-msg p {
+  background-color: #4287f5;
+  border-radius: 10px;
+  padding: 10px;
+  margin-top: 5px;
+  margin-bottom: 5px;
+  text-align: right;
+}
+
+.cb-textInput {
+  border-top: solid 1px;
+  border-color: #adadad;
+  padding: 10px;
+  display: flex;
+}
+
+.cb-textInput textarea {
+  width: 78.5%;
+  border-radius: 10px;
+  height: 50px;
+  resize: none;
+  outline: none;
+  display: inline-block;
+}
+
+.cb-send-btn {
+  display: inline-block;
+  background-color: #4287f5;
+  border-radius: 10px;
+  text-align: center;
+  margin-left: 10px;
+  width: 20%;
+  cursor: pointer;
+}
+
+.cb-send-btn p {
+  position: relative;
+  top: 22.5%;
+  transform: translateY(-50%);
+}
