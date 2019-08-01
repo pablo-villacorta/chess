@@ -25,8 +25,6 @@ let drawIndicator;
 let rematchProposalFlag = false;
 let drawOfferFlag = false;
 
-let nickname;
-
 function preload() {
   blackBishopImg = loadImage("sprites/blackBishop.png");
   blackKingImg = loadImage("sprites/blackKing.png");
@@ -47,8 +45,6 @@ function setup() {
   canvas.parent("gameContainer");
   drawWaitingScreen();
 
-  nickname = prompt("Enter your nickname:");
-
   turnIndicator = document.getElementById("turnIndicator");
   checkIndicator = document.getElementById("checkIndicator");
   checkMateIndicator = document.getElementById("checkMateIndicator");
@@ -67,7 +63,6 @@ function setup() {
   ip = "localhost";
 
   socket = io.connect("http://"+ip+":3000");
-  socket.emit("nickname", {nickname: nickname});
 
   side = width/8;
   margin = side*(1-prop)/2;
@@ -211,7 +206,10 @@ function checkForEnd() {
       //stalemate
       drawIndicator.style.backgroundColor = "#9e63b0";
       gameEnd();
-      socket.emit("gameHasEnded", {reason: "stalemate"});
+      socket.emit("gameHasEnded", {
+        reason: "stalemate",
+        winner: "none"
+      });
     }
   }
 }
@@ -229,14 +227,16 @@ function checkForCheck() {
     checkMateIndicator.style.backgroundColor = "#c92a45";
     resignIndicator.style.backgroundColor = "black";
     socket.emit("gameHasEnded", {
-      reason: "checkmate"
+      reason: "checkmate",
+      winner: myPlayer.isWhite ? "black" : "white"
     });
     alert("You lose");
     gameEnd();
   } else if(op.isInCheckMate()) {
     checkMateIndicator.style.backgroundColor = "#34eb5e";
     socket.emit("gameHasEnded", {
-      reason: "checkmate"
+      reason: "checkmate",
+      winner: myPlayer.isWhite ? "white" : "black"
     });
     alert("You win!");
     gameEnd();

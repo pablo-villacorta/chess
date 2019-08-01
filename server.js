@@ -14,7 +14,7 @@ let app = express();
 
 let db;
 
-app.use(session({
+let sessionMiddleware = session({
   secret: "Secret stuff",
   resave: true,
   saveUninitialized: true,
@@ -22,7 +22,9 @@ app.use(session({
     url: MONGO_URL,
     autoReconnect: true
   })
-}));
+});
+
+app.use(sessionMiddleware);
 
 app.use(bodyParser.json());
 app.use(bodyParser.urlencoded({
@@ -48,7 +50,7 @@ mongoClient.connect(MONGO_URL, {useNewUrlParser: true}, function(err, database) 
 //routing
 app.get("/", function(req, res) {
   if(req.session.username) {
-    res.send("Welcome back, "+req.session.username);
+    res.sendFile(__dirname + "/public/home.html");
   } else {
     res.sendFile(__dirname + "/public/login.html");
   }
@@ -67,7 +69,7 @@ app.post("/signup", function(req, res) {
 app.post("/login", function(req, res) {
   req.session.username = req.body.username;
   let user = db.collection("users").findOne({
-    username: "angusvilla"
+    username: req.body.username
   }, function(err, data) {
     if(data.password == req.body.password) {
       //everything alright
@@ -81,9 +83,19 @@ app.post("/login", function(req, res) {
 app.get("/home", function(req, res) {
   if(req.session.username) {
     //there is a session
-    res.send("Hello, " + req.session.username);
+    res.sendFile(__dirname + "/public/home.html");
   } else {
     //no session
+    res.sendFile(__dirname + "/public/login.html");
+  }
+});
+
+app.get("/userInfo", function(req, res) {
+  if(req.session.username) {
+    res.send({
+      username: req.session.username
+    });
+  } else {
     res.sendFile(__dirname + "/public/login.html");
   }
 });
@@ -95,6 +107,11 @@ let server = app.listen(port, function() {
 
 //game related stuf (sockets - only for game.html)
 var io = socket(server);
+
+io.use(function(socket, next) {
+  sessionMiddleware(socket.request, socket.request.res, next);
+});
+
 io.sockets.on("connection", newConnection);
 
 let queue = [];
@@ -102,34 +119,34 @@ let queue = [];
 function newConnection(socket) {
   //console.log("someone connected");
   let p = new Player(socket, true);
+  p.nickname = socket.request.session.username;
 
-  socket.on("nickname", function(data) {
-    p.nickname = data.nickname;
-    console.log(p.nickname+" connected");
+  console.log(p.nickname+" connected");
 
-    if(queue.length > 0) { //two available players
-      let lastPlayer = queue[0];
-      queue.splice(0, 1);
-      let g = new Game(lastPlayer, p);
-      g.white.game = g;
-      g.black.game = g;
+  if(queue.length > 0) { //two available players
+    let lastPlayer = queue[0];
+    queue.splice(0, 1);
+    let g = new Game(lastPlayer, p);
+    g.white.game = g;
+    g.black.game = g;
 
-      //emit ready message
-      g.white.socket.emit("ready", {
-        isWhite: true,
-        opNickname: g.black.nickname
-      })
-      g.black.socket.emit("ready", {
-        isWhite: false,
-        opNickname: g.white.nickname
-      });
-    } else {
-      queue.push(p);
-      //p.socket.emit("wait", {});
-    }
-  });
+    //emit ready message
+    g.white.socket.emit("ready", {
+      isWhite: true,
+      opNickname: g.black.nickname
+    })
+    g.black.socket.emit("ready", {
+      isWhite: false,
+      opNickname: g.white.nickname
+    });
+  } else {
+    queue.push(p);
+    //p.socket.emit("wait", {});
+  }
+
   socket.on("move", function(data) {
     p.broadcastMove(data);
+
   });
   socket.on("drawOffer", function() {
     let opp = p.isWhite ? p.game.black:p.game.white;
@@ -139,6 +156,15 @@ function newConnection(socket) {
     let opp = p.isWhite ? p.game.black : p.game.white;
     opp.socket.emit("drawAccepted", {});
     p.game.hasEnded = true;
+
+    db.collection("games").insertOne({
+      white: p.game.white.nickname,
+      black: p.game.black.nickname,
+      date: new Date(Date.now()).toISOString(),
+      winner: "none",
+      totalMoves: p.game.moves,
+      endReason: "draw accepted"
+    }, function(err, dat) {});
   });
   socket.on("drawDeclined", function() {
     let opp = p.isWhite ? p.game.black : p.game.white;
@@ -149,9 +175,29 @@ function newConnection(socket) {
     let op = p.isWhite?p.game.black:p.game.white;
     op.socket.emit("resign", {});
     p.game.hasEnded = true;
+
+    db.collection("games").insertOne({
+      white: p.game.white.nickname,
+      black: p.game.black.nickname,
+      date: new Date(Date.now()).toISOString(),
+      winner: p.isWhite ? p.game.black.nickname : p.game.white.nickname,
+      totalMoves: p.game.moves,
+      endReason: "resignation"
+    }, function(err, dat) {});
   });
   socket.on("gameHasEnded", function(data) {
+    if(p.game.hasEnded) return;
     p.game.hasEnded = true;
+
+    //TODO record in the db the game
+    db.collection("games").insertOne({
+      white: p.game.white.nickname,
+      black: p.game.black.nickname,
+      date: new Date(Date.now()).toISOString(),
+      winner: data.winner,
+      totalMoves: p.game.moves,
+      endReason: data.reason
+    }, function(err, dat) {});
   });
   socket.on("rematchProposal", function(data) {
     let op = p.isWhite ? p.game.black:p.game.white;
@@ -176,10 +222,12 @@ function newConnection(socket) {
 
     //emit ready message
     g.white.socket.emit("ready", {
-      isWhite: true
+      isWhite: true,
+      opNickname: g.black.nickname
     })
     g.black.socket.emit("ready", {
-      isWhite: false
+      isWhite: false,
+      opNickname: g.white.nickname
     });
   });
   socket.on("newOpponent", function() {
@@ -195,10 +243,12 @@ function newConnection(socket) {
         g.black.game = g;
 
         g.white.socket.emit("ready", {
-          isWhite: true
+          isWhite: true,
+          opNickname: g.black.nickname
         })
         g.black.socket.emit("ready", {
-          isWhite: false
+          isWhite: false,
+          opNickname: g.white.nickname
         });
 
         done = true;
@@ -217,6 +267,16 @@ function newConnection(socket) {
     if(p.game.hasEnded) return;
     p.disconnect();
     p.game.hasEnded = true;
+
+    //TODO record in the db the game
+    db.collection("games").insertOne({
+      white: p.game.white.nickname,
+      black: p.game.black.nickname,
+      date: new Date(Date.now()).toISOString(),
+      winner: p.isWhite ? p.game.black.nickname : p.game.white.nickname,
+      totalMoves: p.game.moves,
+      endReason: "disconnection"
+    }, function(err, dat) {});
   });
 }
 
