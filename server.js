@@ -1,16 +1,99 @@
-var express = require('express');
-const cors = require('cors');
-var socket = require('socket.io');
+let express = require('express');
+let cors = require('cors');
+let socket = require('socket.io');
+let session = require("express-session");
+let bodyParser = require("body-parser");
+let MongoStore = require("connect-mongo")(session);
+let mongoClient = require("mongodb").MongoClient;
 
-var app = express();
-var server = app.listen(3000);
+const MONGO_URL = "mongodb://localhost:27017/chess";
+
+let port = 3000;
+
+let app = express();
+
+let db;
+
+app.use(session({
+  secret: "Secret stuff",
+  resave: true,
+  saveUninitialized: true,
+  store: new MongoStore({
+    url: MONGO_URL,
+    autoReconnect: true
+  })
+}));
+
+app.use(bodyParser.json());
+app.use(bodyParser.urlencoded({
+  extended: true
+}));
 
 app.use(cors());
 app.options('*', cors());
 
-app.use(express.static('public'));
-console.log("server running!");
+app.use(express.static(__dirname + '/public'));
 
+
+//database connection
+mongoClient.connect(MONGO_URL, {useNewUrlParser: true}, function(err, database) {
+  if(err) throw err;
+
+  console.log("Connected to the database");
+  let dbo = database.db("chess");
+  db = dbo;
+});
+
+
+//routing
+app.get("/", function(req, res) {
+  if(req.session.username) {
+    res.send("Welcome back, "+req.session.username);
+  } else {
+    res.sendFile(__dirname + "/public/login.html");
+  }
+});
+
+app.post("/signup", function(req, res) {
+  req.session.username = req.body.username;
+  db.collection("users").insertOne({
+    name: req.body.name,
+    username: req.body.username,
+    password: req.body.password
+  }, function(e, d) {});
+  res.send("done");
+});
+
+app.post("/login", function(req, res) {
+  req.session.username = req.body.username;
+  let user = db.collection("users").findOne({
+    username: "angusvilla"
+  }, function(err, data) {
+    if(data.password == req.body.password) {
+      //everything alright
+      res.send("done");
+    } else {
+      res.send("bad");
+    }
+  });
+});
+
+app.get("/home", function(req, res) {
+  if(req.session.username) {
+    //there is a session
+    res.send("Hello, " + req.session.username);
+  } else {
+    //no session
+    res.sendFile(__dirname + "/public/login.html");
+  }
+});
+
+
+let server = app.listen(port, function() {
+  console.log("Server running");
+});
+
+//game related stuf (sockets - only for game.html)
 var io = socket(server);
 io.sockets.on("connection", newConnection);
 

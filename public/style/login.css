@@ -1,0 +1,57 @@
+.login-box {
+  font-family: "Arial";
+  border: solid 2px;
+  border-radius: 10px;
+  width: 20%;
+  margin-left: 40%;
+  margin-top: 5%;
+}
+
+.signup-box {
+  font-family: "Arial";
+  border: solid 2px;
+  border-radius: 10px;
+  width: 25%;
+  margin-left: 37.5%;
+  margin-top: 5%;
+}
+
+.title {
+  margin: 2%;
+}
+
+.input-field {
+  padding: 2%;
+  border-radius: 5px;
+  border: solid 2px #ccc;
+  margin: 2%;
+  width: 90.5%;
+  outline: none;
+}
+
+#password-input {
+  margin-top: 0;
+  margin-bottom: 0;
+}
+
+.submit-btn {
+  margin: 2%;
+  margin-top: 0;
+  border-radius: 5px;
+  background-color: #bdcbdb;
+  width: 40%;
+  text-align: center;
+  cursor: pointer;
+}
+
+.submit-btn p {
+  padding: 5%;
+}
+
+#createAccount {
+  margin-left: 2%;
+}
+
+#alreadyOwnAccount {
+  margin-left: 2%;
+}
