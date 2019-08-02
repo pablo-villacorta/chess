@@ -20,7 +20,8 @@ let sessionMiddleware = session({
   saveUninitialized: true,
   store: new MongoStore({
     url: MONGO_URL,
-    autoReconnect: true
+    autoReconnect: true,
+    clear_interval: 3600
   })
 });
 
@@ -92,12 +93,43 @@ app.get("/home", function(req, res) {
 
 app.get("/userInfo", function(req, res) {
   if(req.session.username) {
-    res.send({
-      username: req.session.username
+    let filter = {
+      $or: [{white: req.session.username}, {black: req.session.username}]
+    };
+
+    db.collection("games").find(filter).sort({date: -1}).toArray(function(err, result) {
+      let wins, losses;
+      wins = losses = 0;
+      for(let i = 0; i < result.length; i++) {
+        if(result[i].winner == req.session.username) {
+          wins++;
+        } else if(result[i].winner != "none") {
+          losses++;
+        }
+      }
+      let r = [];
+      for(let i = 0; i < 10; i++) {
+        r[i] = result[i];
+      }
+      res.send({
+        username: req.session.username,
+        games: result,
+        totalGames: result.length,
+        wins: wins,
+        losses: losses
+      });
     });
+
   } else {
     res.sendFile(__dirname + "/public/login.html");
   }
+});
+
+app.get("/logout", function(req, res) {
+  if(req.session.username) {
+    req.session.destroy();
+  }
+  res.sendFile(__dirname + "/public/login.html");
 });
 
 
@@ -189,12 +221,20 @@ function newConnection(socket) {
     if(p.game.hasEnded) return;
     p.game.hasEnded = true;
 
+    let w;
+    if(data.winner == "white") {
+      w = p.game.white.nickname;
+    } else if(data.winner == "black") {
+      w = p.game.black.nickname;
+    } else {
+      w = "none";
+    }
     //TODO record in the db the game
     db.collection("games").insertOne({
       white: p.game.white.nickname,
       black: p.game.black.nickname,
       date: new Date(Date.now()).toISOString(),
-      winner: data.winner,
+      winner: w,
       totalMoves: p.game.moves,
       endReason: data.reason
     }, function(err, dat) {});

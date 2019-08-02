@@ -16,16 +16,19 @@ header {
 
 header h1 {
   margin-left: 3%;
+  width: 10%;
   display: inline-block;
 }
 
 .profile-indicator {
+  position: relative;
   display: inline-block;
-  margin-left: 80%;
+  width: 15%;
+  margin-left: 59%;
+  text-align: center;
   border: solid 1px #fff;
   border-radius: 10px;
   cursor: pointer;
-  position: relative;
   top: 35%;
   transform: translateY(-10%);
 }
@@ -38,17 +41,80 @@ header h1 {
   width: 100%;
 }
 
-.play-btn {
-  width: 30%;
+.top-container {
+  width: 100%;
+}
+
+.indicator {
   background-color: #A9927D;
   text-align: center;
   border-radius: 10px;
-  cursor: pointer;
-  margin-left: 3%;
   border: solid 1px white;
-  margin-top: 2%;
 }
 
-.play-btn h2 {
+#play-btn {
+  width: 30%;
+  cursor: pointer;
+  margin-left: 3%;
+  margin-top: 2%;
+  display: inline-block;
+}
 
+#rates-indicator {
+  width: 43%;
+  display: inline-block;
+  margin-left: 1%;
+}
+
+#played-games-indicator {
+  width:  19%;
+  margin-left: 1%;
+  display: inline-block;
+}
+
+.bottom-container {
+}
+
+#game-history-container {
+  background-color: green;
+  width: 63.55%;
+  margin-left: 34.25%;
+  display: inline-block;
+  margin-top: 1%;
+  padding: 0;
+}
+
+.game-history-table-container {
+  padding: 10px;
+}
+
+#game-history {
+  border: solid;
+  width: 100%;
+}
+
+#table-reason {
+  text-transform: capitalize;
+}
+
+#username {
+  display: inline-block;
+}
+
+.logout-btn {
+  display: inline-block;
+  text-align: center;
+  margin-left: 1%;
+  width: 6%;
+  border: solid 1px white;
+  border-radius: 20px;
+  padding: 0;
+  position: relative;
+  top: 35%;
+  transform: translateY(-10%);
+  cursor: pointer;
+}
+
+.logout-btn p {
+  padding: 3px 5px;
 }
