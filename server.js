@@ -5,13 +5,15 @@ let session = require("express-session");
 let bodyParser = require("body-parser");
 let MongoStore = require("connect-mongo")(session);
 let mongoClient = require("mongodb").MongoClient;
-let bcrypt = require("bcrypt");
+let bcrypt = require("bcryptjs");
+let fs = require("fs");
+let https = require("https");
 
 let HASH_SALT_ROUNDS = 11;
 
 const MONGO_URL = "mongodb://localhost:27017/chess";
 
-let port = 80;
+let port = 443;
 
 let app = express();
 
@@ -153,13 +155,19 @@ app.get("/logout", function(req, res) {
   res.sendFile(__dirname + "/public/login.html");
 });
 
-
-let server = app.listen(port, function() {
-  console.log("Server running");
+let httpsServer = https.createServer({
+  key: fs.readFileSync('sslcert/server.key'),
+  cert: fs.readFileSync('sslcert/server.cert')
+}, app).listen(port, function(){
+  console.log("My https server listening on port " + port + "...");
 });
 
+/*let server = app.listen(port, function() {
+  console.log("Server running");
+});*/
+
 //game related stuf (sockets - only for game.html)
-var io = socket(server);
+var io = socket(httpsServer);
 
 io.use(function(socket, next) {
   sessionMiddleware(socket.request, socket.request.res, next);
