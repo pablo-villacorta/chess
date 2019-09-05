@@ -1,7 +1,7 @@
 $(document).ready(function() {
   $.get("/userInfo", function(res) {
     //show username
-    $("#username").html(res.username);
+    $("#username").html("@"+res.username);
 
     //game history
     let games = res.games;
@@ -35,7 +35,7 @@ $(document).ready(function() {
 
     $("#game-history").html(t);
 
-    $("#played-games").html("Played games: "+res.totalGames);
+    $("#played-games").html("Games played: "+res.totalGames);
 
     let wr, dr, lr;
     if(res.totalGames != 0) {
@@ -51,7 +51,7 @@ $(document).ready(function() {
   $("#play-btn").click(function() {
     window.location.href = "game.html";
   });
-  $(".logout-btn").click(function() {
+  $(".profile-indicator").click(function() {
     window.location.href = "/logout";
   });
 });

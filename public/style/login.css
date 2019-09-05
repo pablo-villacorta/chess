@@ -1,19 +1,28 @@
+body {
+  background-color: #11171C;
+  color: white;
+  font-family: "Crimson Pro", serif;
+}
+
 .login-box {
   font-family: "Arial";
-  border: solid 2px;
+  border: solid 1px white;
   border-radius: 10px;
   width: 20%;
   margin-left: 40%;
   margin-top: 5%;
+  background-color: #6A2E35;
+  font-family: "Crimson Pro", serif;
 }
 
 .signup-box {
-  font-family: "Arial";
-  border: solid 2px;
+  border: solid 1px white;
   border-radius: 10px;
   width: 25%;
   margin-left: 37.5%;
   margin-top: 5%;
+  font-family: "Crimson Pro", serif;
+  background-color: #6A2E35;
 }
 
 .title {
@@ -27,6 +36,7 @@
   margin: 2%;
   width: 90.5%;
   outline: none;
+  font-family: "Crimson Pro", serif;
 }
 
 #password-input {
@@ -36,16 +46,19 @@
 
 .submit-btn {
   margin: 2%;
-  margin-top: 0;
+  margin-top: 4%;
   border-radius: 5px;
-  background-color: #bdcbdb;
+  background-color: #11171C;
   width: 40%;
   text-align: center;
   cursor: pointer;
+  border: solid 1px white;
+  color: white;
 }
 
 .submit-btn p {
-  padding: 5%;
+  margin: 0;
+  padding: 5px;
 }
 
 #createAccount {

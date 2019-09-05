@@ -9,7 +9,6 @@ $(document).ready(function() {
     };
     console.log(obj);
     $.post("/login", obj, function(res) {
-      alert(res);
       if (res == "done") {
         window.location.href = "/home";
       } else if (res == "wrong") {

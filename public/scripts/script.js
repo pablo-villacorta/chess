@@ -61,8 +61,9 @@ function setup() {
 
   //let ip = prompt("Game server IP address?");
   ip = "localhost";
+  //ip = "93.189.89.55";
 
-  socket = io.connect("http://"+ip+":3000");
+  socket = io.connect("http://"+ip+":80");
 
   side = width/8;
   margin = side*(1-prop)/2;

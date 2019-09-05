@@ -5,10 +5,13 @@ let session = require("express-session");
 let bodyParser = require("body-parser");
 let MongoStore = require("connect-mongo")(session);
 let mongoClient = require("mongodb").MongoClient;
+let bcrypt = require("bcrypt");
+
+let HASH_SALT_ROUNDS = 11;
 
 const MONGO_URL = "mongodb://localhost:27017/chess";
 
-let port = 3000;
+let port = 80;
 
 let app = express();
 
@@ -59,12 +62,17 @@ app.get("/", function(req, res) {
 
 app.post("/signup", function(req, res) {
   req.session.username = req.body.username;
-  db.collection("users").insertOne({
-    name: req.body.name,
-    username: req.body.username,
-    password: req.body.password
-  }, function(e, d) {});
-  res.send("done");
+
+  //hash-salt password before storing it
+
+  bcrypt.hash(req.body.password, HASH_SALT_ROUNDS, function(err, hash) {
+    db.collection("users").insertOne({
+      name: req.body.name,
+      username: req.body.username,
+      password: hash
+    }, function(e, d) {});
+    res.send("done");
+  });
 });
 
 app.post("/login", function(req, res) {
@@ -72,12 +80,25 @@ app.post("/login", function(req, res) {
   let user = db.collection("users").findOne({
     username: req.body.username
   }, function(err, data) {
-    if(data.password == req.body.password) {
-      //everything alright
-      res.send("done");
-    } else {
-      res.send("bad");
+    if(err) throw err;
+    if(data == null) {
+      res.send("wrong");
+      return;
     }
+    bcrypt.compare(req.body.password, data.password, function(errr, result) {
+      if(result) {
+        //everything fine
+        res.send("done");
+      } else {
+        res.send("wrong");
+      }
+    });
+    // if(data.password == req.body.password) {
+    //   //everything alright
+    //   res.send("done");
+    // } else {
+    //   res.send("wrong");
+    // }
   });
 });
 
