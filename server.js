@@ -13,6 +13,7 @@ let HASH_SALT_ROUNDS = 11;
 
 const MONGO_URL = "mongodb://localhost:27017/chess";
 
+//let port = 443;
 let port = 443;
 
 let app = express();
@@ -44,10 +45,10 @@ app.use(express.static(__dirname + '/public'));
 
 
 //database connection
-mongoClient.connect(MONGO_URL, {useNewUrlParser: true}, function(err, database) {
+mongoClient.connect(MONGO_URL, {useNewUrlParser: true, useUnifiedTopology: true}, function(err, database) {
   if(err) throw err;
 
-  console.log("Connected to the database");
+  console.log("#Connected to the database");
   let dbo = database.db("chess");
   db = dbo;
 });
@@ -156,15 +157,20 @@ app.get("/logout", function(req, res) {
 });
 
 let httpsServer = https.createServer({
-  key: fs.readFileSync('sslcert/server.key'),
-  cert: fs.readFileSync('sslcert/server.cert')
+  key: fs.readFileSync('/etc/letsencrypt/live/chessit.tk-0002/privkey.pem'),
+  cert: fs.readFileSync('/etc/letsencrypt/live/chessit.tk-0002/cert.pem')
 }, app).listen(port, function(){
-  console.log("My https server listening on port " + port + "...");
+  console.log("#https server listening on port " + port + "...");
 });
 
-/*let server = app.listen(port, function() {
-  console.log("Server running");
-});*/
+// Redirect from http port 80 to https
+var http = require('http');
+http.createServer(function (req, res) {
+    res.writeHead(301, { "Location": "https://" + req.headers['host'] + req.url });
+    res.end();
+}).listen(80, function() {
+  console.log("#http server listening on port 80... (redirections only)");
+});
 
 //game related stuf (sockets - only for game.html)
 var io = socket(httpsServer);

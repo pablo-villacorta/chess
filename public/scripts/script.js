@@ -59,11 +59,7 @@ function setup() {
   textInput = document.getElementById("textInput");
   chatbox = document.getElementById("cb-body");
 
-  //let ip = prompt("Game server IP address?");
-  ip = "localhost";
-  //ip = "93.189.89.55";
-
-  socket = io.connect("http://"+ip+":80");
+  socket = io.connect("https://chessit.tk:443");
 
   side = width/8;
   margin = side*(1-prop)/2;
