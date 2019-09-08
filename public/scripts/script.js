@@ -365,7 +365,6 @@ function startGame(data) {
 
   document.getElementById("opponentName").innerHTML = "@"+op.name;
 
-
   turnIndicator.style.backgroundColor = myPlayer.isWhite?'#c98f2a':'black';
   resignIndicator.style.backgroundColor = myPlayer.isWhite?"#4766a1":"black";
   drawOfferIndicator.style.backgroundColor = myPlayer.isWhite?"#439c4d":black;

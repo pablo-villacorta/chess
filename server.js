@@ -13,7 +13,6 @@ let HASH_SALT_ROUNDS = 11;
 
 const MONGO_URL = "mongodb://localhost:27017/chess";
 
-//let port = 443;
 let port = 443;
 
 let app = express();
@@ -49,8 +48,7 @@ mongoClient.connect(MONGO_URL, {useNewUrlParser: true, useUnifiedTopology: true}
   if(err) throw err;
 
   console.log("#Connected to the database");
-  let dbo = database.db("chess");
-  db = dbo;
+  db = database.db("chess");
 });
 
 
@@ -144,6 +142,23 @@ app.get("/userInfo", function(req, res) {
       });
     });
 
+  } else {
+    res.sendFile(__dirname + "/public/login.html");
+  }
+});
+
+app.get("/play", function(req, res) {
+  if(req.session.username) {
+    let playing = false;
+    for(let i = 0; i < queue.length; i++) {
+      if(queue[i].nickname == req.session.username) {
+        playing = true;
+        break;
+      }
+    }
+    res.send({
+      alreadyPlaying: playing
+    });
   } else {
     res.sendFile(__dirname + "/public/login.html");
   }
@@ -338,7 +353,16 @@ function newConnection(socket) {
     opp.socket.emit("chat", data);
   });
   socket.on("disconnect", function() {
-    console.log("someone disconnected");
+    console.log(p.nickname+" disconnected");
+    if(!p.game) {
+      for(let i = 0; i < queue.length; i++) {
+        if(queue[i].nickname == p.nickname) {
+          queue.splice(i, 1);
+          break;
+        }
+      }
+      return;
+    }
     if(p.game.hasEnded) return;
     p.disconnect();
     p.game.hasEnded = true;

@@ -49,7 +49,13 @@ $(document).ready(function() {
     $("#rates").html("Win: "+wr+"% - Draw: "+dr+"% - Loss: "+lr+"%");
   });
   $("#play-btn").click(function() {
-    window.location.href = "game.html";
+    $.get("/play", function(res) {
+      if(res.alreadyPlaying) {
+        alert("You are already playing in another tab. You can only play one game at a time.");
+      } else {
+        window.location.href = "game.html";
+      }
+    });
   });
   $(".profile-indicator").click(function() {
     window.location.href = "/logout";
